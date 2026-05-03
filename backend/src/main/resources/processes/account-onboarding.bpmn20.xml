@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:flowable="http://flowable.org/bpmn"
+             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+             xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC"
+             xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI"
+             typeLanguage="http://www.w3.org/2001/XMLSchema"
+             expressionLanguage="http://www.w3.org/1999/XPath"
+             targetNamespace="http://rakbank.com/onboarding">
+
+  <process id="accountOnboarding" name="RAKBANK Business Account Onboarding" isExecutable="true">
+
+    <!-- ═══════════════════════════════════════════════
+         START: Customer submits application via portal
+         ═══════════════════════════════════════════════ -->
+    <startEvent id="startEvent" name="Application Submitted">
+      <extensionElements>
+        <flowable:executionListener event="start"
+          delegateExpression="${processAuditListener}"/>
+      </extensionElements>
+    </startEvent>
+
+    <!-- ═══════════════════════════════════════════════
+         STEP 1: UAE Pass Digital Identity Verification
+         ═══════════════════════════════════════════════ -->
+    <serviceTask id="uaePassVerification"
+                 name="UAE Pass Verification"
+                 flowable:delegateExpression="${uaePassDelegate}"
+                 flowable:async="true"
+                 flowable:exclusive="false">
+      <documentation>Verifies customer identity via UAE Pass digital identity platform</documentation>
+    </serviceTask>
+
+    <!-- ═══════════════════════════════════════════════
+         PARALLEL SCREENING — runs all 3 simultaneously
+         ═══════════════════════════════════════════════ -->
+    <parallelGateway id="screeningFork" name="Start Parallel Screening"/>
+
+    <serviceTask id="fircosoftScreening"
+                 name="Fircosoft AML Screening"
+                 flowable:delegateExpression="${fircosoftDelegate}"
+                 flowable:async="true"
+                 flowable:exclusive="false">
+      <documentation>Sanctions and PEP screening via Fircosoft World-Check</documentation>
+    </serviceTask>
+
+    <serviceTask id="aecbCheck"
+                 name="AECB Credit Bureau Check"
+                 flowable:delegateExpression="${aecbDelegate}"
+                 flowable:async="true"
+                 flowable:exclusive="false">
+      <documentation>Credit history check via Al Etihad Credit Bureau</documentation>
+    </serviceTask>
+
+    <serviceTask id="threatMatrixCheck"
+                 name="ThreatMetrix Fraud Check"
+                 flowable:delegateExpression="${threatMatrixDelegate}"
+                 flowable:async="true"
+                 flowable:exclusive="false">
+      <documentation>Device intelligence and fraud risk via ThreatMetrix</documentation>
+    </serviceTask>
+
+    <parallelGateway id="screeningJoin" name="Screening Complete"/>
+
+    <!-- ═══════════════════════════════════════════════
+         STEP 2: Aggregate risk score
+         ═══════════════════════════════════════════════ -->
+    <serviceTask id="riskAssessment"
+                 name="Risk Assessment"
+                 flowable:delegateExpression="${riskAssessmentDelegate}">
+      <documentation>Aggregates screening results into composite risk score</documentation>
+    </serviceTask>
+
+    <!-- ═══════════════════════════════════════════════
+         STEP 3: Decision engine (rules-based)
+         ═══════════════════════════════════════════════ -->
+    <serviceTask id="decisionEngine"
+                 name="Decision Engine"
+                 flowable:delegateExpression="${decisionEngineDelegate}">
+      <documentation>Applies RAKBANK credit and compliance policy rules</documentation>
+    </serviceTask>
+
+    <!-- ═══════════════════════════════════════════════
+         GATEWAY: Route based on decision
+         ═══════════════════════════════════════════════ -->
+    <exclusiveGateway id="decisionGateway" name="Decision Outcome"
+                      default="flowManualReview"/>
+
+    <!-- ═══════════════════════════════════════════════
+         MANUAL REVIEW path (Relationship Manager / Compliance)
+         ═══════════════════════════════════════════════ -->
+    <userTask id="manualReview"
+              name="Manual Review"
+              flowable:candidateGroups="compliance,relationship-manager">
+      <documentation>RM or Compliance Officer reviews flagged application</documentation>
+      <extensionElements>
+        <!-- SLA timer: escalate after 4 business hours -->
+        <flowable:taskListener event="create"
+          delegateExpression="${taskNotificationListener}"/>
+      </extensionElements>
+    </userTask>
+
+    <!-- Boundary Timer: escalate if not reviewed within 4 hours -->
+    <boundaryEvent id="reviewEscalationTimer"
+                   attachedToRef="manualReview"
+                   cancelActivity="false">
+      <timerEventDefinition>
+        <timeDuration>PT4H</timeDuration>
+      </timerEventDefinition>
+    </boundaryEvent>
+
+    <serviceTask id="escalationNotification"
+                 name="Escalate to Senior Manager"
+                 flowable:delegateExpression="${notificationDelegate}">
+      <extensionElements>
+        <flowable:field name="notificationType">
+          <flowable:string>ESCALATION</flowable:string>
+        </flowable:field>
+      </extensionElements>
+    </serviceTask>
+
+    <exclusiveGateway id="reviewDecisionGateway" name="Review Outcome"
+                      default="flowReviewReject"/>
+
+    <!-- ═══════════════════════════════════════════════
+         APPROVED path
+         ═══════════════════════════════════════════════ -->
+    <!-- Converging gateway before EFR — reached from Auto-Approve and Manual-Approve -->
+    <exclusiveGateway id="approvedMerge" name="Approved Merge"/>
+
+    <serviceTask id="efrCheck"
+                 name="EFR Regulatory Filing"
+                 flowable:delegateExpression="${efrDelegate}"
+                 flowable:async="true">
+      <documentation>Emirates Financial Record regulatory submission</documentation>
+    </serviceTask>
+
+    <serviceTask id="createAccount"
+                 name="Create Bank Account"
+                 flowable:delegateExpression="${accountCreationDelegate}">
+      <documentation>Provisions account in core banking system (Temenos T24 stub)</documentation>
+    </serviceTask>
+
+    <serviceTask id="sendWelcome"
+                 name="Send Welcome Notification"
+                 flowable:delegateExpression="${notificationDelegate}">
+      <extensionElements>
+        <flowable:field name="notificationType">
+          <flowable:string>WELCOME</flowable:string>
+        </flowable:field>
+      </extensionElements>
+    </serviceTask>
+
+    <endEvent id="approvedEnd" name="Account Successfully Opened"/>
+
+    <!-- ═══════════════════════════════════════════════
+         REJECTED path
+         ═══════════════════════════════════════════════ -->
+    <serviceTask id="sendRejection"
+                 name="Send Rejection Notification"
+                 flowable:delegateExpression="${notificationDelegate}">
+      <extensionElements>
+        <flowable:field name="notificationType">
+          <flowable:string>REJECTION</flowable:string>
+        </flowable:field>
+      </extensionElements>
+    </serviceTask>
+
+    <endEvent id="rejectedEnd" name="Application Rejected"/>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SEQUENCE FLOWS
+         ═══════════════════════════════════════════════════════════ -->
+
+    <!-- Start → UAE Pass -->
+    <sequenceFlow id="flow_start_uaepass"
+                  sourceRef="startEvent"
+                  targetRef="uaePassVerification"/>
+
+    <!-- UAE Pass → Parallel Fork -->
+    <sequenceFlow id="flow_uaepass_fork"
+                  sourceRef="uaePassVerification"
+                  targetRef="screeningFork"/>
+
+    <!-- Parallel Fork → 3 Screening Services -->
+    <sequenceFlow id="flow_fork_fircosoft"
+                  sourceRef="screeningFork"
+                  targetRef="fircosoftScreening"/>
+    <sequenceFlow id="flow_fork_aecb"
+                  sourceRef="screeningFork"
+                  targetRef="aecbCheck"/>
+    <sequenceFlow id="flow_fork_threatmatrix"
+                  sourceRef="screeningFork"
+                  targetRef="threatMatrixCheck"/>
+
+    <!-- 3 Screening Services → Join -->
+    <sequenceFlow id="flow_fircosoft_join"
+                  sourceRef="fircosoftScreening"
+                  targetRef="screeningJoin"/>
+    <sequenceFlow id="flow_aecb_join"
+                  sourceRef="aecbCheck"
+                  targetRef="screeningJoin"/>
+    <sequenceFlow id="flow_threatmatrix_join"
+                  sourceRef="threatMatrixCheck"
+                  targetRef="screeningJoin"/>
+
+    <!-- Join → Risk Assessment → Decision Engine → Decision Gateway -->
+    <sequenceFlow id="flow_join_risk"
+                  sourceRef="screeningJoin"
+                  targetRef="riskAssessment"/>
+    <sequenceFlow id="flow_risk_decision"
+                  sourceRef="riskAssessment"
+                  targetRef="decisionEngine"/>
+    <sequenceFlow id="flow_decision_gateway"
+                  sourceRef="decisionEngine"
+                  targetRef="decisionGateway"/>
+
+    <!-- Decision Gateway: AUTO_APPROVE -->
+    <sequenceFlow id="flowAutoApprove"
+                  name="Auto Approve"
+                  sourceRef="decisionGateway"
+                  targetRef="approvedMerge">
+      <conditionExpression xsi:type="tFormalExpression">${decision == 'AUTO_APPROVE'}</conditionExpression>
+    </sequenceFlow>
+
+    <!-- Decision Gateway: MANUAL_REVIEW (default) -->
+    <sequenceFlow id="flowManualReview"
+                  name="Manual Review"
+                  sourceRef="decisionGateway"
+                  targetRef="manualReview"/>
+
+    <!-- Decision Gateway: AUTO_REJECT -->
+    <sequenceFlow id="flowAutoReject"
+                  name="Auto Reject"
+                  sourceRef="decisionGateway"
+                  targetRef="sendRejection">
+      <conditionExpression xsi:type="tFormalExpression">${decision == 'AUTO_REJECT'}</conditionExpression>
+    </sequenceFlow>
+
+    <!-- Manual Review → Review Decision Gateway -->
+    <sequenceFlow id="flow_review_gateway"
+                  sourceRef="manualReview"
+                  targetRef="reviewDecisionGateway"/>
+
+    <!-- Review Outcome: APPROVED -->
+    <sequenceFlow id="flowReviewApprove"
+                  name="Approved"
+                  sourceRef="reviewDecisionGateway"
+                  targetRef="approvedMerge">
+      <conditionExpression xsi:type="tFormalExpression">${reviewDecision == 'APPROVED'}</conditionExpression>
+    </sequenceFlow>
+
+    <!-- Review Outcome: REJECTED (default) -->
+    <sequenceFlow id="flowReviewReject"
+                  name="Rejected"
+                  sourceRef="reviewDecisionGateway"
+                  targetRef="sendRejection"/>
+
+    <!-- Escalation timer path -->
+    <sequenceFlow id="flow_escalation"
+                  sourceRef="reviewEscalationTimer"
+                  targetRef="escalationNotification"/>
+    <sequenceFlow id="flow_escalation_end"
+                  sourceRef="escalationNotification"
+                  targetRef="escalationEnd"/>
+    <endEvent id="escalationEnd" name="Escalation Sent"/>
+
+    <!-- Approved Merge → EFR → Create Account → Welcome → End -->
+    <sequenceFlow id="flow_merge_efr"
+                  sourceRef="approvedMerge"
+                  targetRef="efrCheck"/>
+    <sequenceFlow id="flow_efr_create"
+                  sourceRef="efrCheck"
+                  targetRef="createAccount"/>
+    <sequenceFlow id="flow_create_welcome"
+                  sourceRef="createAccount"
+                  targetRef="sendWelcome"/>
+    <sequenceFlow id="flow_welcome_end"
+                  sourceRef="sendWelcome"
+                  targetRef="approvedEnd"/>
+
+    <!-- Rejection → End -->
+    <sequenceFlow id="flow_rejection_end"
+                  sourceRef="sendRejection"
+                  targetRef="rejectedEnd"/>
+
+  </process>
+</definitions>
