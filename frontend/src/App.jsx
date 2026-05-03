@@ -17,22 +17,22 @@ const NAV = [
 
 function Sidebar() {
   return (
-    <aside className="w-60 shrink-0 bg-gray-900 border-r border-gray-800 flex flex-col">
+    <aside className="w-60 shrink-0 bg-white border-r border-gray-200 shadow-sm flex flex-col">
       {/* Logo */}
-      <div className="px-5 py-5 border-b border-gray-800">
+      <div className="px-5 py-4 border-b border-gray-100">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-rakbank-red rounded-lg flex items-center justify-center font-bold text-sm">
+          <div className="w-9 h-9 bg-rakbank-red rounded-lg flex items-center justify-center font-bold text-sm text-white">
             RAK
           </div>
           <div>
-            <div className="font-bold text-sm text-white leading-tight">RAKBANK</div>
-            <div className="text-xs text-gray-500 leading-tight">Business Onboarding</div>
+            <div className="font-bold text-sm text-gray-900 leading-tight">RAKBANK</div>
+            <div className="text-xs text-gray-400 leading-tight">Business Onboarding</div>
           </div>
         </div>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-3 py-4 space-y-1">
+      <nav className="flex-1 px-3 py-4 space-y-0.5">
         {NAV.map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
@@ -41,8 +41,8 @@ function Sidebar() {
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
                ${isActive
-                 ? 'bg-rakbank-red/20 text-rakbank-red'
-                 : 'text-gray-400 hover:text-white hover:bg-gray-800'}`
+                 ? 'bg-rakbank-red text-white shadow-sm'
+                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`
             }
           >
             <Icon size={17} />
@@ -52,10 +52,10 @@ function Sidebar() {
       </nav>
 
       {/* Footer badge */}
-      <div className="px-4 py-4 border-t border-gray-800">
-        <div className="text-[11px] text-gray-600">Powered by</div>
-        <div className="text-xs font-bold text-gray-400 mt-0.5">Flowable BPM 7.0</div>
-        <div className="text-[11px] text-gray-600 mt-1">Spring Boot 3.2 · React 18</div>
+      <div className="px-4 py-4 border-t border-gray-100">
+        <div className="text-[11px] text-gray-400">Powered by</div>
+        <div className="text-xs font-bold text-gray-700 mt-0.5">Flowable BPM 7.0</div>
+        <div className="text-[11px] text-gray-400 mt-1">Spring Boot 3.2 · React 18</div>
       </div>
     </aside>
   )
@@ -64,9 +64,9 @@ function Sidebar() {
 export default function App() {
   return (
     <BrowserRouter>
-      <div className="flex h-screen overflow-hidden">
+      <div className="flex h-screen overflow-hidden bg-gray-50">
         <Sidebar />
-        <main className="flex-1 overflow-y-auto bg-gray-950">
+        <main className="flex-1 overflow-y-auto bg-gray-50">
           <Routes>
             <Route path="/"                     element={<Dashboard />} />
             <Route path="/new"                  element={<NewApplication />} />

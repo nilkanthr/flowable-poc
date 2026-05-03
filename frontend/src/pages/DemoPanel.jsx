@@ -9,7 +9,7 @@ const SCENARIOS = [
     id:          'happy-path',
     title:       'Happy Path — Auto Approve',
     icon:        '✅',
-    color:       'border-emerald-800 hover:border-emerald-600',
+    color:       'border-emerald-200 hover:border-emerald-400 hover:shadow-md',
     badge:       'badge-approved',
     badgeLabel:  'AUTO_APPROVE',
     description: 'Low-risk mainland trading company. All 3 parallel screenings pass. Decision engine auto-approves. Account created in core banking.',
@@ -20,7 +20,7 @@ const SCENARIOS = [
     id:          'sanctions-hit',
     title:       'Sanctions Hit — Instant Reject',
     icon:        '🚫',
-    color:       'border-red-800 hover:border-red-600',
+    color:       'border-red-200 hover:border-red-400 hover:shadow-md',
     badge:       'badge-rejected',
     badgeLabel:  'AUTO_REJECT',
     description: 'Fircosoft flags an exact OFAC SDN list match during parallel screening. Hard-stop rule fires immediately.',
@@ -31,7 +31,7 @@ const SCENARIOS = [
     id:          'manual-review',
     title:       'Manual Review — PEP Detected',
     icon:        '👤',
-    color:       'border-amber-800 hover:border-amber-600',
+    color:       'border-amber-200 hover:border-amber-400 hover:shadow-md',
     badge:       'badge-review',
     badgeLabel:  'MANUAL_REVIEW',
     description: 'Fircosoft flags signatory as PEP Level-2. Risk band HIGH. Process pauses at human task — RM/Compliance must review.',
@@ -42,7 +42,7 @@ const SCENARIOS = [
     id:          'credit-fail',
     title:       'Credit Fail — AECB Reject',
     icon:        '📉',
-    color:       'border-orange-800 hover:border-orange-600',
+    color:       'border-orange-200 hover:border-orange-400 hover:shadow-md',
     badge:       'badge-rejected',
     badgeLabel:  'AUTO_REJECT',
     description: 'AECB returns active defaults of AED 2.4M. AECB FAIL triggers credit policy rule — auto rejected.',
@@ -53,7 +53,7 @@ const SCENARIOS = [
     id:          'bulk',
     title:       'Bulk Launch — 5 Concurrent Applications',
     icon:        '⚡',
-    color:       'border-purple-800 hover:border-purple-600',
+    color:       'border-purple-200 hover:border-purple-400 hover:shadow-md',
     badge:       'badge-running',
     badgeLabel:  'CONCURRENT',
     description: 'Launches 5 applications simultaneously. Demonstrates Flowable\'s async executor and distributed processing — 15 external calls running in parallel.',
@@ -69,7 +69,7 @@ function ScenarioCard({ scenario, onRun, loading }) {
         <div className="flex items-center gap-3">
           <span className="text-2xl">{scenario.icon}</span>
           <div>
-            <div className="font-semibold text-white">{scenario.title}</div>
+            <div className="font-semibold text-gray-900">{scenario.title}</div>
             <span className={scenario.badge}>{scenario.badgeLabel}</span>
           </div>
         </div>
@@ -85,19 +85,19 @@ function ScenarioCard({ scenario, onRun, loading }) {
         </button>
       </div>
 
-      <p className="text-sm text-gray-400 mb-3">{scenario.description}</p>
+      <p className="text-sm text-gray-600 mb-3">{scenario.description}</p>
 
       <div className="space-y-1">
         {scenario.highlights.map((h, i) => (
           <div key={i} className="flex items-start gap-2 text-xs text-gray-500">
-            <ChevronRight size={12} className="mt-0.5 text-gray-600 shrink-0" />
+            <ChevronRight size={12} className="mt-0.5 text-gray-400 shrink-0" />
             {h}
           </div>
         ))}
       </div>
 
-      <div className="mt-3 pt-3 border-t border-gray-800 text-xs text-gray-600">
-        Expected: <span className="text-gray-400">{scenario.expectedOutcome}</span>
+      <div className="mt-3 pt-3 border-t border-gray-100 text-xs text-gray-400">
+        Expected: <span className="text-gray-600">{scenario.expectedOutcome}</span>
       </div>
     </div>
   )
@@ -122,7 +122,6 @@ export default function DemoPanel() {
         expectedDuration: data.expectedDurationSec,
       }, ...prev].slice(0, 20))
 
-      // Navigate to first process
       if (ids.length === 1) {
         navigate(`/application/${ids[0]}`)
       }
@@ -137,8 +136,8 @@ export default function DemoPanel() {
     <div className="p-6 space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-          <Zap size={22} className="text-amber-400" />
+        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+          <Zap size={22} className="text-amber-500" />
           Demo Controls
         </h1>
         <p className="text-sm text-gray-500 mt-1">
@@ -147,9 +146,9 @@ export default function DemoPanel() {
       </div>
 
       {/* Backend warning */}
-      <div className="p-3 bg-blue-900/20 border border-blue-900/40 rounded-lg text-xs text-blue-300 flex items-center gap-2">
+      <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-700 flex items-center gap-2">
         <AlertTriangle size={14} className="shrink-0" />
-        Ensure Spring Boot backend is running: <code className="bg-gray-800 px-1.5 py-0.5 rounded ml-1">cd backend && mvn spring-boot:run</code>
+        Ensure Spring Boot backend is running: <code className="bg-blue-100 px-1.5 py-0.5 rounded ml-1">cd backend &amp;&amp; mvn spring-boot:run</code>
       </div>
 
       {/* Scenario cards */}
@@ -162,13 +161,13 @@ export default function DemoPanel() {
       {/* Results log */}
       {results.length > 0 && (
         <div className="card">
-          <h2 className="text-sm font-semibold text-gray-300 mb-3">Run History</h2>
+          <h2 className="text-sm font-semibold text-gray-700 mb-3">Run History</h2>
           <div className="space-y-2">
             {results.map((r, i) => (
-              <div key={i} className="bg-gray-800/50 rounded-lg p-3 text-xs">
+              <div key={i} className="bg-gray-50 border border-gray-100 rounded-lg p-3 text-xs">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="font-medium text-gray-200">{r.scenarioId}</span>
-                  <span className="text-gray-600">{r.timestamp}</span>
+                  <span className="font-medium text-gray-800">{r.scenarioId}</span>
+                  <span className="text-gray-400">{r.timestamp}</span>
                 </div>
                 <div className="text-gray-500 mb-1">{r.description}</div>
                 <div className="flex flex-wrap gap-2">
@@ -176,7 +175,7 @@ export default function DemoPanel() {
                     <button
                       key={pid}
                       onClick={() => navigate(`/application/${pid}`)}
-                      className="font-mono text-blue-400 hover:text-blue-300 bg-blue-900/20 px-2 py-0.5 rounded"
+                      className="font-mono text-blue-600 hover:text-blue-800 bg-blue-50 px-2 py-0.5 rounded border border-blue-200"
                     >
                       {pid.substring(0, 16)}...
                     </button>
@@ -189,7 +188,7 @@ export default function DemoPanel() {
       )}
 
       {/* CTO talking points */}
-      <div className="card border-rakbank-red/30 border">
+      <div className="card border-rakbank-red/20 border-2">
         <h2 className="text-sm font-semibold text-rakbank-red mb-4">CTO Presentation Talking Points</h2>
         <div className="grid grid-cols-2 gap-4">
           {[
@@ -224,10 +223,10 @@ export default function DemoPanel() {
               icon: '☁️'
             },
           ].map(p => (
-            <div key={p.point} className="bg-gray-800/50 rounded-lg p-3">
+            <div key={p.point} className="bg-gray-50 border border-gray-100 rounded-lg p-3">
               <div className="flex items-center gap-2 mb-1">
                 <span>{p.icon}</span>
-                <span className="font-semibold text-gray-200 text-sm">{p.point}</span>
+                <span className="font-semibold text-gray-800 text-sm">{p.point}</span>
               </div>
               <p className="text-xs text-gray-500">{p.detail}</p>
             </div>

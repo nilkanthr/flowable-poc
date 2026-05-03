@@ -56,7 +56,7 @@ export default function NewApplication() {
 
   return (
     <div className="p-6 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold text-white mb-1">New Business Account Application</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-1">New Business Account Application</h1>
       <p className="text-sm text-gray-500 mb-6">RAKBANK Business Banking — Account Onboarding</p>
 
       {/* Step indicator */}
@@ -66,22 +66,22 @@ export default function NewApplication() {
             <button
               onClick={() => i < step && setStep(i)}
               className={`flex items-center gap-2 text-sm font-medium transition-colors ${
-                i === step ? 'text-white' : i < step ? 'text-emerald-400 cursor-pointer' : 'text-gray-600'
+                i === step ? 'text-gray-900' : i < step ? 'text-emerald-600 cursor-pointer' : 'text-gray-400'
               }`}
             >
-              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs border ${
+              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs border-2 ${
                 i === step
                   ? 'border-rakbank-red bg-rakbank-red text-white'
                   : i < step
-                  ? 'border-emerald-500 bg-emerald-900/40 text-emerald-400'
-                  : 'border-gray-700 text-gray-600'
+                  ? 'border-emerald-500 bg-emerald-50 text-emerald-600'
+                  : 'border-gray-300 text-gray-400'
               }`}>
                 {i < step ? <CheckCircle2 size={12} /> : i + 1}
               </span>
               {s}
             </button>
             {i < STEPS.length - 1 && (
-              <div className={`h-px w-8 ${i < step ? 'bg-emerald-700' : 'bg-gray-800'}`} />
+              <div className={`h-px w-8 ${i < step ? 'bg-emerald-400' : 'bg-gray-200'}`} />
             )}
           </div>
         ))}
@@ -90,7 +90,7 @@ export default function NewApplication() {
       <div className="card space-y-4">
         {step === 0 && (
           <>
-            <h2 className="font-semibold text-gray-200 mb-2">Company Information</h2>
+            <h2 className="font-semibold text-gray-800 mb-2">Company Information</h2>
             <div className="grid grid-cols-2 gap-4">
               <Field label="Company Name *">
                 <input className="input" value={form.companyName} onChange={set('companyName')}
@@ -133,9 +133,8 @@ export default function NewApplication() {
                 </select>
               </Field>
             </div>
-            {/* Demo scenario selector */}
-            <div className="mt-4 p-3 bg-amber-900/20 border border-amber-900/40 rounded-lg">
-              <label className="label text-amber-400">Demo Scenario (for CTO demo)</label>
+            <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+              <label className="label text-amber-700">Demo Scenario (for CTO demo)</label>
               <select className="input" value={form.scenario} onChange={set('scenario')}>
                 <option value="HAPPY_PATH">Happy Path — Auto Approve</option>
                 <option value="SANCTIONS_HIT">Sanctions Hit — Auto Reject (Fircosoft)</option>
@@ -148,7 +147,7 @@ export default function NewApplication() {
 
         {step === 1 && (
           <>
-            <h2 className="font-semibold text-gray-200 mb-2">Authorized Signatory</h2>
+            <h2 className="font-semibold text-gray-800 mb-2">Authorized Signatory</h2>
             <div className="grid grid-cols-2 gap-4">
               <Field label="Full Name *">
                 <input className="input" value={form.signatoryName} onChange={set('signatoryName')}
@@ -176,7 +175,7 @@ export default function NewApplication() {
 
         {step === 2 && (
           <>
-            <h2 className="font-semibold text-gray-200 mb-2">Contact Details</h2>
+            <h2 className="font-semibold text-gray-800 mb-2">Contact Details</h2>
             <div className="grid grid-cols-2 gap-4">
               <Field label="Email Address *">
                 <input type="email" className="input" value={form.email} onChange={set('email')}
@@ -198,17 +197,17 @@ export default function NewApplication() {
             </Field>
 
             {/* Summary */}
-            <div className="mt-4 p-4 bg-gray-800 rounded-lg text-xs space-y-1 text-gray-400">
-              <div className="font-semibold text-gray-300 mb-2">Application Summary</div>
-              <div><span className="text-gray-500">Company:</span> {form.companyName || '—'}</div>
-              <div><span className="text-gray-500">License:</span> {form.licenseNumber} ({form.licenseType})</div>
-              <div><span className="text-gray-500">Activity:</span> {form.businessActivity}</div>
-              <div><span className="text-gray-500">Signatory:</span> {form.signatoryName || '—'}</div>
-              <div><span className="text-gray-500 text-amber-400">Scenario:</span> <span className="text-amber-300">{form.scenario}</span></div>
+            <div className="mt-4 p-4 bg-gray-50 border border-gray-100 rounded-lg text-xs space-y-1 text-gray-600">
+              <div className="font-semibold text-gray-800 mb-2">Application Summary</div>
+              <div><span className="text-gray-400">Company:</span> {form.companyName || '—'}</div>
+              <div><span className="text-gray-400">License:</span> {form.licenseNumber} ({form.licenseType})</div>
+              <div><span className="text-gray-400">Activity:</span> {form.businessActivity}</div>
+              <div><span className="text-gray-400">Signatory:</span> {form.signatoryName || '—'}</div>
+              <div><span className="text-amber-600">Scenario:</span> <span className="text-amber-700 font-medium">{form.scenario}</span></div>
             </div>
 
             {error && (
-              <div className="p-3 bg-red-900/30 border border-red-800 rounded-lg text-red-400 text-sm">{error}</div>
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">{error}</div>
             )}
           </>
         )}
