@@ -2,1282 +2,859 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>RAKBANK — Flowable BPM POC | CTO Presentation</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>RAKBANK — Flowable BPM | CTO Presentation</title>
 <style>
-:root {
-  --rak-red:    #C8102E;
-  --rak-red2:   #A00C23;
-  --rak-bg:     #F7F8FA;
-  --rak-white:  #FFFFFF;
-  --rak-card:   #FFFFFF;
-  --rak-border: #E2E8F0;
-  --rak-text:   #1A1A2E;
-  --rak-muted:  #64748B;
-  --rak-light:  #F1F5F9;
-  --rak-green:  #059669;
-  --rak-amber:  #D97706;
-  --rak-blue:   #2563EB;
-  --rak-purple: #7C3AED;
-}
-
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-html, body {
-  width: 100%; height: 100%;
-  background: var(--rak-bg);
-  color: var(--rak-text);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  overflow: hidden;
-}
-
-.deck { width: 100%; height: 100vh; position: relative; }
-
-.slide {
-  position: absolute; inset: 0;
-  display: flex; flex-direction: column;
-  justify-content: center; align-items: center;
-  padding: 48px 64px;
-  opacity: 0; pointer-events: none;
-  transition: opacity 0.35s ease, transform 0.35s ease;
-  transform: translateY(16px);
-  background: var(--rak-bg);
-}
-.slide.active  { opacity: 1; pointer-events: all; transform: translateY(0); }
-.slide.exit-left  { transform: translateX(-50px); opacity: 0; }
-.slide.exit-right { transform: translateX(50px);  opacity: 0; }
-
-/* Navigation */
-.nav-btn {
-  position: fixed; top: 50%; transform: translateY(-50%);
-  background: var(--rak-white); border: 1px solid var(--rak-border);
-  border-radius: 50%; width: 44px; height: 44px;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; font-size: 18px; color: var(--rak-muted);
-  transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,.08); z-index: 100;
-}
-.nav-btn:hover { background: var(--rak-red); color: white; border-color: var(--rak-red); }
-.nav-prev { left: 20px; }
-.nav-next { right: 20px; }
-
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f8f9fa;color:#1a1a2e;overflow:hidden}
+.deck{width:100%;height:100vh;position:relative}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;padding:56px 64px 40px;opacity:0;pointer-events:none;transition:opacity .35s,transform .35s;transform:translateY(16px);background:#f8f9fa}
+.slide.active{opacity:1;pointer-events:all;transform:translateY(0)}
+/* Header bar */
+.topbar{position:fixed;top:0;left:0;right:0;height:48px;background:#fff;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;padding:0 64px;z-index:100}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-box{width:28px;height:28px;background:#C8102E;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:9px}
+.logo-name{font-weight:700;font-size:13px}
+.logo-sub{font-size:11px;color:#64748b}
+.topbar-tag{font-size:11px;color:#64748b;background:#f1f5f9;padding:3px 10px;border-radius:12px;border:1px solid #e2e8f0}
 /* Progress */
-.progress-bar {
-  position: fixed; top: 0; left: 0; right: 0; height: 3px;
-  background: var(--rak-border); z-index: 200;
-}
-.progress-fill { height: 100%; background: var(--rak-red); transition: width 0.3s ease; }
-
-/* Slide counter */
-.slide-counter {
-  position: fixed; bottom: 20px; right: 72px;
-  font-size: 12px; color: var(--rak-muted); z-index: 100;
-  background: var(--rak-white); padding: 4px 10px; border-radius: 20px;
-  border: 1px solid var(--rak-border);
-}
-
-/* Header strip in slides */
-.slide-header {
-  position: fixed; top: 3px; left: 0; right: 0; height: 48px;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 72px; background: var(--rak-white);
-  border-bottom: 1px solid var(--rak-border); z-index: 50;
-}
-.header-logo { display: flex; align-items: center; gap: 10px; }
-.header-logo .mark {
-  width: 30px; height: 30px; background: var(--rak-red); border-radius: 6px;
-  display: flex; align-items: center; justify-content: center;
-  color: white; font-weight: 800; font-size: 10px;
-}
-.header-logo .name { font-weight: 700; font-size: 13px; color: var(--rak-text); }
-.header-logo .sub  { font-size: 11px; color: var(--rak-muted); margin-top: 1px; }
-.header-tag {
-  font-size: 11px; color: var(--rak-muted); background: var(--rak-light);
-  padding: 3px 10px; border-radius: 12px; border: 1px solid var(--rak-border);
-}
-
-/* Common layout helpers */
-.slide-content { width: 100%; max-width: 1100px; padding-top: 48px; }
-
-h1.slide-title {
-  font-size: 2.4rem; font-weight: 800; color: var(--rak-text); line-height: 1.15;
-}
-h1.slide-title span { color: var(--rak-red); }
-
-h2.section-title {
-  font-size: 1.6rem; font-weight: 700; color: var(--rak-text); margin-bottom: 6px;
-}
-h2.section-title span { color: var(--rak-red); }
-
-.subtitle { font-size: 1rem; color: var(--rak-muted); margin-top: 8px; }
-
-.card {
-  background: var(--rak-white); border: 1px solid var(--rak-border);
-  border-radius: 12px; padding: 20px;
-  box-shadow: 0 1px 4px rgba(0,0,0,.05);
-}
-
-.pill {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 600;
-}
-.pill-red    { background: #FEF2F4; color: var(--rak-red); border: 1px solid #FECDD3; }
-.pill-green  { background: #F0FDF4; color: var(--rak-green); border: 1px solid #BBF7D0; }
-.pill-blue   { background: #EFF6FF; color: var(--rak-blue); border: 1px solid #BFDBFE; }
-.pill-amber  { background: #FFFBEB; color: var(--rak-amber); border: 1px solid #FDE68A; }
-.pill-purple { background: #F5F3FF; color: var(--rak-purple); border: 1px solid #DDD6FE; }
-.pill-gray   { background: var(--rak-light); color: var(--rak-muted); border: 1px solid var(--rak-border); }
-
-.divider { width: 48px; height: 4px; background: var(--rak-red); border-radius: 2px; margin: 12px 0; }
-
-/* Grid helpers */
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
-.grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px; }
-
-/* Animated progress bars */
-@keyframes grow { from { width: 0; } to { width: var(--target); } }
-.bar-track {
-  height: 28px; background: var(--rak-light); border-radius: 6px; overflow: hidden;
-  border: 1px solid var(--rak-border);
-}
-.bar-fill {
-  height: 100%; display: flex; align-items: center; padding-left: 10px;
-  font-size: 12px; font-weight: 600; color: white; border-radius: 6px;
-  animation: grow 1.2s ease-out forwards;
-}
-
-/* Table styles */
-.comp-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.comp-table th {
-  padding: 10px 14px; text-align: left; background: var(--rak-light);
-  border-bottom: 2px solid var(--rak-border); font-weight: 600; color: var(--rak-muted);
-  font-size: 12px;
-}
-.comp-table td { padding: 9px 14px; border-bottom: 1px solid var(--rak-border); vertical-align: top; }
-.comp-table tr:last-child td { border-bottom: none; }
-.comp-table tr:hover td { background: var(--rak-light); }
-.win { color: var(--rak-green); font-weight: 600; }
-.lose { color: var(--rak-muted); }
-
-/* Callout box */
-.callout {
-  background: var(--rak-light); border-left: 4px solid var(--rak-red);
-  border-radius: 0 8px 8px 0; padding: 14px 18px; font-size: 13px;
-  color: var(--rak-text);
-}
-.callout-blue { border-left-color: var(--rak-blue); }
-.callout-green { border-left-color: var(--rak-green); }
-.callout-amber { border-left-color: var(--rak-amber); }
-
-/* DB group cards */
-.db-group {
-  border-radius: 10px; padding: 14px; border: 1px solid var(--rak-border);
-}
-
-/* Timeline */
-.timeline-item { display: flex; gap: 16px; margin-bottom: 20px; }
-.timeline-dot {
-  width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 14px; font-weight: 700; color: white;
-}
-.timeline-content { flex: 1; padding-top: 6px; }
-.timeline-line {
-  width: 2px; background: var(--rak-border); margin: 0 auto;
-  height: 20px; margin-left: 17px; margin-top: -4px; margin-bottom: -4px;
-}
-
-/* Stat big number */
-.stat-num { font-size: 3rem; font-weight: 800; color: var(--rak-red); line-height: 1; }
-.stat-label { font-size: 13px; color: var(--rak-muted); margin-top: 4px; }
-
-/* SVG diagram helpers */
-.diag-box {
-  rx: 8; ry: 8;
-}
+.progress{position:fixed;top:0;left:0;right:0;height:3px;z-index:200}
+.progress-fill{height:100%;background:#C8102E;transition:width .3s}
+.counter{position:fixed;bottom:18px;right:60px;font-size:11px;color:#64748b;background:#fff;border:1px solid #e2e8f0;padding:3px 10px;border-radius:12px;z-index:100}
+/* Nav buttons */
+.nav{position:fixed;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:#fff;border:1px solid #e2e8f0;cursor:pointer;font-size:16px;color:#64748b;display:flex;align-items:center;justify-content:center;z-index:100;box-shadow:0 2px 6px rgba(0,0,0,.08);transition:all .2s}
+.nav:hover{background:#C8102E;color:#fff;border-color:#C8102E}
+.nav-l{left:14px}
+.nav-r{right:14px}
+/* Content helpers */
+.content{width:100%;max-width:1080px;margin:0 auto;padding-top:12px}
+h1{font-size:2.2rem;font-weight:800;line-height:1.2;color:#1a1a2e}
+h1 span,h2 span{color:#C8102E}
+h2{font-size:1.5rem;font-weight:700;color:#1a1a2e;margin-bottom:6px}
+.bar{width:44px;height:4px;background:#C8102E;border-radius:2px;margin:10px 0 20px}
+.sub{color:#64748b;font-size:.95rem;margin-top:8px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.grid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600}
+.pr{background:#fef2f4;color:#C8102E;border:1px solid #fecdd3}
+.pg{background:#f0fdf4;color:#059669;border:1px solid #bbf7d0}
+.pb{background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe}
+.pa{background:#fffbeb;color:#d97706;border:1px solid #fde68a}
+.pp{background:#f5f3ff;color:#7c3aed;border:1px solid #ddd6fe}
+.pz{background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0}
+.tag-r{border-top:3px solid #C8102E}
+.tag-g{border-top:3px solid #059669}
+.tag-b{border-top:3px solid #2563eb}
+.tag-a{border-top:3px solid #d97706}
+.tag-p{border-top:3px solid #7c3aed}
+.row{display:flex;align-items:flex-start;gap:12px;padding:10px 14px;border-radius:8px;border:1px solid #e2e8f0;background:#fff}
+.row.red{background:#fef2f4;border-color:#fecdd3}
+.row.green{background:#f0fdf4;border-color:#bbf7d0}
+.row.amber{background:#fffbeb;border-color:#fde68a}
+.row.blue{background:#eff6ff;border-color:#bfdbfe}
+.callout{background:#f1f5f9;border-left:4px solid #C8102E;border-radius:0 8px 8px 0;padding:12px 16px;font-size:13px}
+.callout.g{border-left-color:#059669}
+.big{font-size:2.6rem;font-weight:800;color:#C8102E;line-height:1}
+.muted{color:#64748b;font-size:12px;margin-top:3px}
+/* Comparison table */
+.cmp{width:100%;border-collapse:collapse;font-size:12px}
+.cmp th{padding:9px 12px;background:#f8f9fa;border-bottom:2px solid #e2e8f0;text-align:left;font-size:11px;color:#64748b;font-weight:600}
+.cmp td{padding:8px 12px;border-bottom:1px solid #f1f5f9;vertical-align:top}
+.cmp tr:hover td{background:#f8f9fa}
+.win{color:#059669;font-weight:600}
+/* Bar chart */
+.btrack{height:26px;background:#f1f5f9;border-radius:6px;overflow:hidden;border:1px solid #e2e8f0;margin-bottom:6px}
+.bfill{height:100%;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:600;color:#fff;border-radius:6px}
 </style>
 </head>
 <body>
 
-<!-- Fixed header -->
-<div class="slide-header">
-  <div class="header-logo">
-    <div class="mark">RAK</div>
-    <div>
-      <div class="name">RAKBANK</div>
-      <div class="sub">Business Banking</div>
-    </div>
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-box">RAK</div>
+    <div><div class="logo-name">RAKBANK</div><div class="logo-sub">Business Banking</div></div>
   </div>
-  <div class="header-tag">Flowable BPM · CTO Briefing · Confidential</div>
+  <div class="topbar-tag">Flowable BPM · CTO Briefing · Confidential</div>
 </div>
+<div class="progress"><div class="progress-fill" id="pf" style="width:5%"></div></div>
+<div class="counter" id="cnt">1 / 20</div>
+<button class="nav nav-l" onclick="go(-1)">&#8592;</button>
+<button class="nav nav-r" onclick="go(+1)">&#8594;</button>
 
-<div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
-<div class="slide-counter" id="counter">1 / 20</div>
+<div class="deck">
 
-<button class="nav-btn nav-prev" onclick="nav(-1)">&#8592;</button>
-<button class="nav-btn nav-next" onclick="nav(+1)">&#8594;</button>
-
-<div class="deck" id="deck">
-
-<!-- ═══════════════════════════════════════════════════════════ SLIDE 1 — TITLE -->
+<!-- ── 1. TITLE ───────────────────────────────────────────── -->
 <div class="slide active">
-  <div class="slide-content" style="display:flex;flex-direction:column;justify-content:center;height:100%;padding-top:72px;">
-    <div style="max-width:680px;">
-      <div class="pill pill-red" style="margin-bottom:20px;">POC · May 2026</div>
-      <h1 class="slide-title">Business Account<br>Onboarding with<br><span>Flowable BPM</span></h1>
-      <div class="divider"></div>
-      <p class="subtitle" style="font-size:1.1rem;max-width:520px;line-height:1.6;">
-        A production-grade proof of concept demonstrating Flowable's capabilities
-        vs Newgen iBPS for RAKBANK's enterprise banking workflows.
-      </p>
-      <div style="margin-top:32px;display:flex;gap:12px;flex-wrap:wrap;">
-        <div class="pill pill-green">✓ Live Demo Running</div>
-        <div class="pill pill-blue">✓ Spring Boot 3.2 + React 18</div>
-        <div class="pill pill-gray">Apache 2.0 — Zero License Cost</div>
-      </div>
+  <div class="content" style="padding-top:60px">
+    <div class="pill pr" style="margin-bottom:16px">POC · May 2026</div>
+    <h1>Business Account Onboarding<br>with <span>Flowable BPM</span></h1>
+    <div class="bar"></div>
+    <p class="sub" style="max-width:520px;line-height:1.7">
+      A production-grade proof of concept demonstrating Flowable's capabilities
+      vs Newgen iBPS for RAKBANK's enterprise banking workflows.
+    </p>
+    <div style="margin-top:28px;display:flex;gap:10px;flex-wrap:wrap">
+      <span class="pill pg">✓ Live Demo Running</span>
+      <span class="pill pb">✓ Spring Boot 3.2 + React 18</span>
+      <span class="pill pz">Apache 2.0 — Zero License Cost</span>
     </div>
-    <div style="position:absolute;right:64px;top:50%;transform:translateY(-50%);opacity:.06;font-size:260px;font-weight:900;color:var(--rak-red);pointer-events:none;line-height:1;">
-      BPM
+    <div style="position:absolute;right:64px;top:50%;transform:translateY(-50%);font-size:220px;font-weight:900;color:#C8102E;opacity:.04;pointer-events:none;line-height:1">BPM</div>
+  </div>
+</div>
+
+<!-- ── 2. AGENDA ──────────────────────────────────────────── -->
+<div class="slide">
+  <div class="content">
+    <h2>Today's <span>Agenda</span></h2><div class="bar"></div>
+    <div class="grid2" style="gap:12px">
+      <div class="card" style="display:flex;gap:12px"><span style="font-size:20px;font-weight:800;color:#C8102E;opacity:.3">01</span><div><b>Challenge</b><div class="muted">Current pain points and what we set out to prove</div></div></div>
+      <div class="card" style="display:flex;gap:12px"><span style="font-size:20px;font-weight:800;color:#C8102E;opacity:.3">02</span><div><b>Architecture</b><div class="muted">Flowable embedded in Spring Boot microservices</div></div></div>
+      <div class="card" style="display:flex;gap:12px"><span style="font-size:20px;font-weight:800;color:#C8102E;opacity:.3">03</span><div><b>BPMN Process Flow</b><div class="muted">14-activity onboarding process with parallel gateway</div></div></div>
+      <div class="card" style="display:flex;gap:12px"><span style="font-size:20px;font-weight:800;color:#C8102E;opacity:.3">04</span><div><b>Parallel Processing</b><div class="muted">61% faster screening — 3 async tasks simultaneously</div></div></div>
+      <div class="card" style="display:flex;gap:12px"><span style="font-size:20px;font-weight:800;color:#C8102E;opacity:.3">05</span><div><b>5 Demo Scenarios</b><div class="muted">Happy path, sanctions, PEP, credit fail, bulk</div></div></div>
+      <div class="card" style="display:flex;gap:12px"><span style="font-size:20px;font-weight:800;color:#C8102E;opacity:.3">06</span><div><b>Flowable vs Newgen iBPS</b><div class="muted">15-feature comparison — Flowable wins 12 of 15</div></div></div>
+      <div class="card" style="display:flex;gap:12px"><span style="font-size:20px;font-weight:800;color:#C8102E;opacity:.3">07</span><div><b>54 Tables — Reality Check</b><div class="muted">Shared platform model — not per microservice</div></div></div>
+      <div class="card" style="display:flex;gap:12px"><span style="font-size:20px;font-weight:800;color:#C8102E;opacity:.3">08</span><div><b>Multi-Squad Architecture</b><div class="muted">5 squads, 1 platform, zero schema duplication</div></div></div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════ SLIDE 2 — AGENDA -->
+<!-- ── 3. CHALLENGE ───────────────────────────────────────── -->
 <div class="slide">
-  <div class="slide-content">
-    <h2 class="section-title">Today's <span>Agenda</span></h2>
-    <div class="divider"></div>
-    <div class="grid-2" style="margin-top:28px;gap:14px;">
-      {[
-        ['01', 'The Challenge', 'Current onboarding pain points and what we set out to prove'],
-        ['02', 'Architecture', 'How Flowable embeds into RAKBANK\'s Spring Boot microservices'],
-        ['03', 'Live Demo', '5 pre-built scenarios — parallel processing, resilience, human tasks'],
-        ['04', 'BPMN Process Flow', 'Walk-through of the full onboarding process diagram'],
-        ['05', 'Deployment Architecture', 'How Flowable scales across squads — the 54-table question answered'],
-        ['06', 'Flowable vs Newgen iBPS', '15-feature comparison — why Flowable wins 12 of 15'],
-        ['07', 'Database Design', '54 tables — design rationale and enterprise management patterns'],
-        ['08', 'Cost & Roadmap', 'TCO analysis and 6-month implementation timeline'],
-      ].map(([n, t, d]) => `
-        <div class="card" style="display:flex;gap:14px;align-items:flex-start;">
-          <div style="font-size:22px;font-weight:800;color:var(--rak-red);opacity:.3;line-height:1;flex-shrink:0;">${n}</div>
-          <div>
-            <div style="font-weight:700;color:var(--rak-text);margin-bottom:3px;">${t}</div>
-            <div style="font-size:12px;color:var(--rak-muted);">${d}</div>
-          </div>
-        </div>`).join('')}
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════════════════════ SLIDE 3 — CHALLENGE -->
-<div class="slide">
-  <div class="slide-content">
-    <h2 class="section-title">The <span>Challenge</span></h2>
-    <div class="divider"></div>
-    <div class="grid-2" style="margin-top:28px;">
+  <div class="content">
+    <h2>The <span>Challenge</span></h2><div class="bar"></div>
+    <div class="grid2">
       <div>
-        <div style="font-size:13px;font-weight:700;color:var(--rak-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:14px;">Current State — Pain Points</div>
-        <div style="display:flex;flex-direction:column;gap:10px;">
-          {[
-            ['🐌','Sequential processing','Fircosoft → AECB → ThreatMetrix run one-by-one. AML screening alone takes 6-8 seconds.'],
-            ['🔒','Vendor lock-in','Newgen iBPS proprietary process format. Studio IDE required for every change.'],
-            ['💸','License overhead','Per-seat + per-process + runtime licensing. Cost scales with usage.'],
-            ['🔧','Slow deployments','Process changes require Studio → test cycle → iBPS admin deploy → server restart.'],
-            ['👁️','Limited visibility','No real-time process monitoring. Audit trail requires manual extraction.'],
-          ].map(([i,t,d]) => `
-            <div style="display:flex;gap:12px;align-items:flex-start;padding:12px;background:var(--rak-light);border-radius:8px;border:1px solid var(--rak-border);">
-              <span style="font-size:18px;flex-shrink:0;">${i}</span>
-              <div><div style="font-weight:600;font-size:13px;margin-bottom:2px;">${t}</div><div style="font-size:12px;color:var(--rak-muted);">${d}</div></div>
-            </div>`).join('')}
+        <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">Current State — Pain Points</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div class="row red"><span style="font-size:18px">🐌</span><div><b style="font-size:13px">Sequential processing</b><div class="muted">Fircosoft → AECB → ThreatMetrix one-by-one. 6-8 seconds.</div></div></div>
+          <div class="row red"><span style="font-size:18px">🔒</span><div><b style="font-size:13px">Vendor lock-in</b><div class="muted">Newgen iBPS proprietary format. Studio IDE required.</div></div></div>
+          <div class="row red"><span style="font-size:18px">💸</span><div><b style="font-size:13px">License overhead</b><div class="muted">Per-seat + per-process + runtime licensing fees.</div></div></div>
+          <div class="row red"><span style="font-size:18px">🔧</span><div><b style="font-size:13px">Slow deployments</b><div class="muted">Studio → test cycle → admin deploy → server restart.</div></div></div>
+          <div class="row red"><span style="font-size:18px">👁️</span><div><b style="font-size:13px">Limited visibility</b><div class="muted">No real-time monitoring. Audit requires manual extraction.</div></div></div>
         </div>
       </div>
       <div>
-        <div style="font-size:13px;font-weight:700;color:var(--rak-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:14px;">What We Proved With Flowable</div>
-        <div style="display:flex;flex-direction:column;gap:10px;">
-          {[
-            ['⚡','Parallel screening','3 services run simultaneously. Total time: 2.5s instead of 6.5s sequential.','green'],
-            ['🔓','Zero lock-in','BPMN 2.0 ISO standard. Any tool reads it. Apache 2.0 licensed.','green'],
-            ['🎁','Zero license cost','Embedded in Spring Boot. No BPM server. No per-seat fees.','green'],
-            ['🚀','30-second deploys','Edit BPMN → hot redeploy. Running instances unaffected.','green'],
-            ['📊','Real-time audit','Every step, variable, decision timestamped. REST API queryable.','green'],
-          ].map(([i,t,d,c]) => `
-            <div style="display:flex;gap:12px;align-items:flex-start;padding:12px;background:#F0FDF4;border-radius:8px;border:1px solid #BBF7D0;">
-              <span style="font-size:18px;flex-shrink:0;">${i}</span>
-              <div><div style="font-weight:600;font-size:13px;margin-bottom:2px;color:var(--rak-green);">${t}</div><div style="font-size:12px;color:var(--rak-muted);">${d}</div></div>
-            </div>`).join('')}
+        <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">Proven With Flowable</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div class="row green"><span style="font-size:18px">⚡</span><div><b style="font-size:13px;color:#059669">Parallel screening</b><div class="muted">3 services simultaneously. 2.5s instead of 6.5s.</div></div></div>
+          <div class="row green"><span style="font-size:18px">🔓</span><div><b style="font-size:13px;color:#059669">Zero lock-in</b><div class="muted">BPMN 2.0 ISO standard. Apache 2.0 licensed.</div></div></div>
+          <div class="row green"><span style="font-size:18px">🎁</span><div><b style="font-size:13px;color:#059669">Zero license cost</b><div class="muted">Embedded in Spring Boot. No per-seat fees.</div></div></div>
+          <div class="row green"><span style="font-size:18px">🚀</span><div><b style="font-size:13px;color:#059669">30-second deploys</b><div class="muted">Edit BPMN → hot redeploy. Running instances unaffected.</div></div></div>
+          <div class="row green"><span style="font-size:18px">📊</span><div><b style="font-size:13px;color:#059669">Real-time audit</b><div class="muted">Every step, variable, decision timestamped. REST API.</div></div></div>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════ SLIDE 4 — ARCHITECTURE -->
+<!-- ── 4. ARCHITECTURE ─────────────────────────────────────── -->
 <div class="slide">
-  <div class="slide-content">
-    <h2 class="section-title">System <span>Architecture</span></h2>
-    <div class="divider"></div>
-    <div style="margin-top:24px;display:flex;gap:20px;align-items:flex-start;">
-      <!-- Stack -->
-      <div style="flex:1;">
-        <div style="font-size:12px;font-weight:700;color:var(--rak-muted);text-transform:uppercase;margin-bottom:12px;">Technology Stack</div>
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          {[
-            ['Frontend','React 18 · Vite · Tailwind CSS · Recharts','#EFF6FF','#BFDBFE','var(--rak-blue)'],
-            ['API Layer','Spring Boot 3.2 REST · springdoc OpenAPI 2.5','#F0FDF4','#BBF7D0','var(--rak-green)'],
-            ['BPM Engine','Flowable 7.0.1 — embedded in same JVM','#FEF2F4','#FECDD3','var(--rak-red)'],
-            ['Process Def','BPMN 2.0 XML · 14 activities · Parallel Gateway','#FEF2F4','#FECDD3','var(--rak-red)'],
-            ['Persistence','H2 in-memory (dev) → PostgreSQL (prod) · 54 tables','#FFFBEB','#FDE68A','var(--rak-amber)'],
-            ['External Stubs','Fircosoft · AECB · ThreatMetrix · UAE Pass · EFR','#F5F3FF','#DDD6FE','var(--rak-purple)'],
-          ].map(([l,d,bg,br,tc]) => `
-            <div style="display:flex;gap:12px;align-items:center;padding:10px 14px;background:${bg};border-radius:8px;border:1px solid ${br};">
-              <div style="font-weight:700;font-size:12px;color:${tc};width:110px;flex-shrink:0;">${l}</div>
-              <div style="font-size:12px;color:var(--rak-text);">${d}</div>
-            </div>`).join('')}
-        </div>
+  <div class="content">
+    <h2>System <span>Architecture</span></h2><div class="bar"></div>
+    <div style="display:flex;gap:20px">
+      <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+        <div class="row blue" style="padding:10px 14px"><span style="font-size:12px;font-weight:700;color:#2563eb;width:90px;flex-shrink:0">Frontend</span><span style="font-size:12px">React 18 · Vite · Tailwind CSS · Recharts</span></div>
+        <div class="row green" style="padding:10px 14px"><span style="font-size:12px;font-weight:700;color:#059669;width:90px;flex-shrink:0">API Layer</span><span style="font-size:12px">Spring Boot 3.2 REST · springdoc OpenAPI 2.5</span></div>
+        <div class="row red" style="padding:10px 14px"><span style="font-size:12px;font-weight:700;color:#C8102E;width:90px;flex-shrink:0">BPM Engine</span><span style="font-size:12px">Flowable 7.0.1 — embedded in same JVM</span></div>
+        <div class="row red" style="padding:10px 14px"><span style="font-size:12px;font-weight:700;color:#C8102E;width:90px;flex-shrink:0">Process Def</span><span style="font-size:12px">BPMN 2.0 XML · 14 activities · Parallel Gateway</span></div>
+        <div class="row amber" style="padding:10px 14px"><span style="font-size:12px;font-weight:700;color:#d97706;width:90px;flex-shrink:0">Persistence</span><span style="font-size:12px">H2 in-memory (dev) → PostgreSQL (prod) · 54 tables</span></div>
+        <div class="row" style="padding:10px 14px;background:#f5f3ff;border-color:#ddd6fe"><span style="font-size:12px;font-weight:700;color:#7c3aed;width:90px;flex-shrink:0">Ext. Stubs</span><span style="font-size:12px">Fircosoft · AECB · ThreatMetrix · UAE Pass · EFR</span></div>
       </div>
-      <!-- Key numbers -->
-      <div style="width:260px;display:flex;flex-direction:column;gap:12px;">
-        <div style="font-size:12px;font-weight:700;color:var(--rak-muted);text-transform:uppercase;margin-bottom:4px;">Key Metrics</div>
-        {[
-          ['14','BPMN Activities'],['3','Parallel Screenings'],['5','Demo Scenarios'],
-          ['54','Flowable DB Tables'],['~8s','End-to-End Time'],['0','License Cost'],
-        ].map(([n,l]) => `
-          <div class="card" style="text-align:center;padding:14px;">
-            <div style="font-size:2rem;font-weight:800;color:var(--rak-red);">${n}</div>
-            <div style="font-size:11px;color:var(--rak-muted);margin-top:2px;">${l}</div>
-          </div>`).join('')}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;width:280px;align-self:start">
+        <div class="card" style="text-align:center;padding:14px"><div class="big" style="font-size:2rem">14</div><div class="muted">BPMN Activities</div></div>
+        <div class="card" style="text-align:center;padding:14px"><div class="big" style="font-size:2rem">3</div><div class="muted">Parallel Tasks</div></div>
+        <div class="card" style="text-align:center;padding:14px"><div class="big" style="font-size:2rem">54</div><div class="muted">DB Tables</div></div>
+        <div class="card" style="text-align:center;padding:14px"><div class="big" style="font-size:2rem">~8s</div><div class="muted">End-to-End</div></div>
+        <div class="card" style="text-align:center;padding:14px;grid-column:span 2"><div class="big" style="font-size:2rem;color:#059669">AED 0</div><div class="muted">License Cost</div></div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════ SLIDE 5 — BPMN PROCESS FLOW -->
+<!-- ── 5. BPMN FLOW ───────────────────────────────────────── -->
 <div class="slide">
-  <div class="slide-content" style="padding-top:58px;">
-    <h2 class="section-title">BPMN Process <span>Flow</span></h2>
-    <div class="divider" style="margin-bottom:16px;"></div>
-    <div class="card" style="padding:20px;overflow:hidden;">
-      <svg viewBox="0 0 1060 240" width="100%" style="display:block;max-height:200px;">
-        <defs>
-          <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-            <path d="M0,0 L0,6 L8,3 z" fill="#94A3B8"/>
-          </marker>
-        </defs>
+  <div class="content">
+    <h2>BPMN Process <span>Flow</span></h2><div class="bar" style="margin-bottom:14px"></div>
+    <div class="card" style="padding:16px">
+      <svg viewBox="0 0 980 210" width="100%" style="display:block">
+        <defs><marker id="a" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0L0,6L7,3z" fill="#94a3b8"/></marker></defs>
         <!-- Start -->
-        <circle cx="34" cy="120" r="16" fill="#C8102E"/>
-        <text x="34" y="148" text-anchor="middle" font-size="9" fill="#64748B">Start</text>
-        <!-- Arrow -->
-        <line x1="50" y1="120" x2="72" y2="120" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arr)"/>
+        <circle cx="30" cy="105" r="14" fill="#C8102E"/>
+        <text x="30" y="130" text-anchor="middle" font-size="8" fill="#64748b">Start</text>
+        <line x1="44" y1="105" x2="64" y2="105" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#a)"/>
         <!-- UAE Pass -->
-        <rect x="72" y="104" width="80" height="32" rx="6" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1.5"/>
-        <text x="112" y="118" text-anchor="middle" font-size="9" fill="#2563EB" font-weight="600">UAE Pass</text>
-        <text x="112" y="130" text-anchor="middle" font-size="8" fill="#64748B">Verification</text>
-        <!-- Arrow -->
-        <line x1="152" y1="120" x2="174" y2="120" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arr)"/>
-        <!-- Fork gateway -->
-        <polygon points="188,106 202,120 188,134 174,120" fill="#FFFBEB" stroke="#F59E0B" stroke-width="2"/>
-        <text x="188" y="124" text-anchor="middle" font-size="10" fill="#D97706">⚡</text>
-        <text x="188" y="150" text-anchor="middle" font-size="8" fill="#64748B">Fork</text>
-        <!-- 3 parallel branches -->
+        <rect x="64" y="89" width="76" height="32" rx="6" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+        <text x="102" y="103" text-anchor="middle" font-size="9" fill="#2563eb" font-weight="600">UAE Pass</text>
+        <text x="102" y="115" text-anchor="middle" font-size="8" fill="#64748b">Verification</text>
+        <line x1="140" y1="105" x2="160" y2="105" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#a)"/>
+        <!-- Fork -->
+        <polygon points="174,91 188,105 174,119 160,105" fill="#fffbeb" stroke="#f59e0b" stroke-width="2"/>
+        <text x="174" y="135" text-anchor="middle" font-size="8" fill="#64748b">Fork</text>
         <!-- Fircosoft -->
-        <line x1="202" y1="120" x2="212" y2="60" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arr)"/>
-        <rect x="212" y="44" width="88" height="32" rx="6" fill="#FEF2F4" stroke="#FECDD3" stroke-width="1.5"/>
-        <text x="256" y="58" text-anchor="middle" font-size="9" fill="#C8102E" font-weight="600">Fircosoft AML</text>
-        <text x="256" y="70" text-anchor="middle" font-size="8" fill="#64748B">async=true</text>
+        <line x1="188" y1="105" x2="200" y2="48" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#a)"/>
+        <rect x="200" y="32" width="84" height="32" rx="6" fill="#fef2f4" stroke="#fecdd3" stroke-width="1.5"/>
+        <text x="242" y="46" text-anchor="middle" font-size="9" fill="#C8102E" font-weight="600">Fircosoft AML</text>
+        <text x="242" y="57" text-anchor="middle" font-size="8" fill="#64748b">async=true</text>
         <!-- AECB -->
-        <line x1="202" y1="120" x2="212" y2="120" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arr)"/>
-        <rect x="212" y="104" width="88" height="32" rx="6" fill="#F0FDF4" stroke="#BBF7D0" stroke-width="1.5"/>
-        <text x="256" y="118" text-anchor="middle" font-size="9" fill="#059669" font-weight="600">AECB Credit</text>
-        <text x="256" y="130" text-anchor="middle" font-size="8" fill="#64748B">async=true</text>
+        <line x1="188" y1="105" x2="200" y2="105" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#a)"/>
+        <rect x="200" y="89" width="84" height="32" rx="6" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.5"/>
+        <text x="242" y="103" text-anchor="middle" font-size="9" fill="#059669" font-weight="600">AECB Credit</text>
+        <text x="242" y="115" text-anchor="middle" font-size="8" fill="#64748b">async=true</text>
         <!-- ThreatMetrix -->
-        <line x1="202" y1="120" x2="212" y2="180" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arr)"/>
-        <rect x="212" y="164" width="88" height="32" rx="6" fill="#F5F3FF" stroke="#DDD6FE" stroke-width="1.5"/>
-        <text x="256" y="178" text-anchor="middle" font-size="9" fill="#7C3AED" font-weight="600">ThreatMetrix</text>
-        <text x="256" y="190" text-anchor="middle" font-size="8" fill="#64748B">async=true</text>
-        <!-- Join lines -->
-        <line x1="300" y1="60" x2="320" y2="120" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arr)"/>
-        <line x1="300" y1="120" x2="320" y2="120" stroke="#94A3B8" stroke-width="1.5"/>
-        <line x1="300" y1="180" x2="320" y2="120" stroke="#94A3B8" stroke-width="1.5"/>
-        <!-- Join gateway -->
-        <polygon points="334,106 348,120 334,134 320,120" fill="#FFFBEB" stroke="#F59E0B" stroke-width="2"/>
-        <text x="334" y="150" text-anchor="middle" font-size="8" fill="#64748B">Join</text>
-        <!-- Risk Assessment -->
-        <line x1="348" y1="120" x2="368" y2="120" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arr)"/>
-        <rect x="368" y="104" width="76" height="32" rx="6" fill="#FFFBEB" stroke="#FDE68A" stroke-width="1.5"/>
-        <text x="406" y="118" text-anchor="middle" font-size="9" fill="#D97706" font-weight="600">Risk</text>
-        <text x="406" y="130" text-anchor="middle" font-size="8" fill="#64748B">Assessment</text>
+        <line x1="188" y1="105" x2="200" y2="162" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#a)"/>
+        <rect x="200" y="146" width="84" height="32" rx="6" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="1.5"/>
+        <text x="242" y="160" text-anchor="middle" font-size="9" fill="#7c3aed" font-weight="600">ThreatMetrix</text>
+        <text x="242" y="172" text-anchor="middle" font-size="8" fill="#64748b">async=true</text>
+        <!-- Join -->
+        <line x1="284" y1="48" x2="304" y2="105" stroke="#94a3b8" stroke-width="1.5"/>
+        <line x1="284" y1="105" x2="304" y2="105" stroke="#94a3b8" stroke-width="1.5"/>
+        <line x1="284" y1="162" x2="304" y2="105" stroke="#94a3b8" stroke-width="1.5"/>
+        <polygon points="318,91 332,105 318,119 304,105" fill="#fffbeb" stroke="#f59e0b" stroke-width="2"/>
+        <text x="318" y="135" text-anchor="middle" font-size="8" fill="#64748b">Join</text>
+        <!-- Risk -->
+        <line x1="332" y1="105" x2="350" y2="105" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#a)"/>
+        <rect x="350" y="89" width="72" height="32" rx="6" fill="#fffbeb" stroke="#fde68a" stroke-width="1.5"/>
+        <text x="386" y="103" text-anchor="middle" font-size="9" fill="#d97706" font-weight="600">Risk</text>
+        <text x="386" y="115" text-anchor="middle" font-size="8" fill="#64748b">Assessment</text>
         <!-- Decision Engine -->
-        <line x1="444" y1="120" x2="462" y2="120" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arr)"/>
-        <rect x="462" y="104" width="76" height="32" rx="6" fill="#F5F3FF" stroke="#DDD6FE" stroke-width="1.5"/>
-        <text x="500" y="118" text-anchor="middle" font-size="9" fill="#7C3AED" font-weight="600">Decision</text>
-        <text x="500" y="130" text-anchor="middle" font-size="8" fill="#64748B">Engine</text>
-        <!-- Decision Gateway -->
-        <line x1="538" y1="120" x2="556" y2="120" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arr)"/>
-        <polygon points="570,106 584,120 570,134 556,120" fill="#F7F8FA" stroke="#C8102E" stroke-width="2"/>
-        <!-- 3 outcomes -->
-        <!-- Approve -->
-        <line x1="584" y1="120" x2="604" y2="60" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arr)"/>
-        <rect x="604" y="44" width="76" height="32" rx="6" fill="#F0FDF4" stroke="#BBF7D0" stroke-width="1.5"/>
-        <text x="642" y="58" text-anchor="middle" font-size="9" fill="#059669" font-weight="600">EFR + Account</text>
-        <text x="642" y="70" text-anchor="middle" font-size="8" fill="#64748B">+ Welcome</text>
+        <line x1="422" y1="105" x2="440" y2="105" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#a)"/>
+        <rect x="440" y="89" width="72" height="32" rx="6" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="1.5"/>
+        <text x="476" y="103" text-anchor="middle" font-size="9" fill="#7c3aed" font-weight="600">Decision</text>
+        <text x="476" y="115" text-anchor="middle" font-size="8" fill="#64748b">Engine</text>
+        <!-- Decision GW -->
+        <line x1="512" y1="105" x2="530" y2="105" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#a)"/>
+        <polygon points="544,91 558,105 544,119 530,105" fill="#f8f9fa" stroke="#C8102E" stroke-width="2"/>
+        <!-- Approve path -->
+        <line x1="558" y1="105" x2="576" y2="48" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#a)"/>
+        <rect x="576" y="32" width="84" height="32" rx="6" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.5"/>
+        <text x="618" y="46" text-anchor="middle" font-size="9" fill="#059669" font-weight="600">EFR + Account</text>
+        <text x="618" y="57" text-anchor="middle" font-size="8" fill="#64748b">+ Welcome</text>
         <!-- Manual Review -->
-        <line x1="584" y1="120" x2="604" y2="120" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arr)"/>
-        <rect x="604" y="104" width="76" height="32" rx="6" fill="#FFFBEB" stroke="#FDE68A" stroke-width="1.5"/>
-        <text x="642" y="116" text-anchor="middle" font-size="9" fill="#D97706" font-weight="600">Manual</text>
-        <text x="642" y="128" text-anchor="middle" font-size="8" fill="#64748B">Review RM</text>
-        <!-- Timer badge -->
-        <circle cx="680" cy="106" r="9" fill="white" stroke="#FDE68A" stroke-width="1.5"/>
-        <text x="680" y="110" text-anchor="middle" font-size="9" fill="#D97706">⏱</text>
+        <line x1="558" y1="105" x2="576" y2="105" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#a)"/>
+        <rect x="576" y="89" width="84" height="32" rx="6" fill="#fffbeb" stroke="#fde68a" stroke-width="1.5"/>
+        <text x="618" y="103" text-anchor="middle" font-size="9" fill="#d97706" font-weight="600">Manual Review</text>
+        <text x="618" y="115" text-anchor="middle" font-size="8" fill="#64748b">RM / Compliance</text>
+        <circle cx="660" cy="91" r="8" fill="#fff" stroke="#fde68a" stroke-width="1.5"/>
+        <text x="660" y="95" text-anchor="middle" font-size="9" fill="#d97706">⏱</text>
         <!-- Reject -->
-        <line x1="584" y1="120" x2="604" y2="180" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arr)"/>
-        <rect x="604" y="164" width="76" height="32" rx="6" fill="#FEF2F4" stroke="#FECDD3" stroke-width="1.5"/>
-        <text x="642" y="178" text-anchor="middle" font-size="9" fill="#C8102E" font-weight="600">Reject</text>
-        <text x="642" y="190" text-anchor="middle" font-size="8" fill="#64748B">Notification</text>
-        <!-- End events -->
-        <line x1="680" y1="60" x2="720" y2="60" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arr)"/>
-        <circle cx="736" cy="60" r="14" fill="none" stroke="#059669" stroke-width="3"/>
-        <circle cx="736" cy="60" r="8" fill="#059669"/>
-        <text x="736" y="84" text-anchor="middle" font-size="9" fill="#059669">Approved</text>
-        <line x1="680" y1="180" x2="720" y2="180" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arr)"/>
-        <circle cx="736" cy="180" r="14" fill="none" stroke="#C8102E" stroke-width="3"/>
-        <circle cx="736" cy="180" r="8" fill="#C8102E"/>
-        <text x="736" y="204" text-anchor="middle" font-size="9" fill="#C8102E">Rejected</text>
+        <line x1="558" y1="105" x2="576" y2="162" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#a)"/>
+        <rect x="576" y="146" width="84" height="32" rx="6" fill="#fef2f4" stroke="#fecdd3" stroke-width="1.5"/>
+        <text x="618" y="160" text-anchor="middle" font-size="9" fill="#C8102E" font-weight="600">Reject</text>
+        <text x="618" y="172" text-anchor="middle" font-size="8" fill="#64748b">Notification</text>
+        <!-- End approved -->
+        <line x1="660" y1="48" x2="696" y2="48" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#a)"/>
+        <circle cx="710" cy="48" r="12" fill="none" stroke="#059669" stroke-width="2.5"/>
+        <circle cx="710" cy="48" r="6" fill="#059669"/>
+        <text x="710" y="70" text-anchor="middle" font-size="8" fill="#059669">Approved</text>
+        <!-- End rejected -->
+        <line x1="660" y1="162" x2="696" y2="162" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#a)"/>
+        <circle cx="710" cy="162" r="12" fill="none" stroke="#C8102E" stroke-width="2.5"/>
+        <circle cx="710" cy="162" r="6" fill="#C8102E"/>
+        <text x="710" y="184" text-anchor="middle" font-size="8" fill="#C8102E">Rejected</text>
         <!-- Legend -->
-        <rect x="780" y="44" width="260" height="148" rx="8" fill="white" stroke="#E2E8F0" stroke-width="1"/>
-        <text x="910" y="64" text-anchor="middle" font-size="10" fill="#64748B" font-weight="700">LEGEND</text>
-        <rect x="796" y="76" width="20" height="12" rx="3" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1"/>
-        <text x="824" y="87" font-size="9" fill="#64748B">Service Task (sync)</text>
-        <rect x="796" y="96" width="20" height="12" rx="3" fill="#FEF2F4" stroke="#FECDD3" stroke-width="1.5"/>
-        <text x="824" y="107" font-size="9" fill="#64748B">Service Task (async)</text>
-        <polygon points="806,122 814,116 822,122 814,128" fill="#FFFBEB" stroke="#F59E0B" stroke-width="1.5"/>
-        <text x="832" y="127" font-size="9" fill="#64748B">Gateway (XOR/Parallel)</text>
-        <rect x="796" y="136" width="20" height="12" rx="3" fill="#FFFBEB" stroke="#FDE68A" stroke-width="1.5"/>
-        <text x="824" y="147" font-size="9" fill="#64748B">User Task</text>
-        <circle cx="806" cy="168" r="6" fill="none" stroke="#059669" stroke-width="2"/>
-        <circle cx="806" cy="168" r="3" fill="#059669"/>
-        <text x="820" y="172" font-size="9" fill="#64748B">End Event</text>
+        <rect x="740" y="24" width="224" height="164" rx="8" fill="#fff" stroke="#e2e8f0" stroke-width="1"/>
+        <text x="852" y="42" text-anchor="middle" font-size="9" fill="#64748b" font-weight="700">LEGEND</text>
+        <rect x="756" y="52" width="18" height="11" rx="3" fill="#eff6ff" stroke="#bfdbfe"/>
+        <text x="780" y="62" font-size="9" fill="#64748b">Service Task (sync)</text>
+        <rect x="756" y="70" width="18" height="11" rx="3" fill="#fef2f4" stroke="#fecdd3" stroke-width="1.5"/>
+        <text x="780" y="80" font-size="9" fill="#64748b">Service Task (async)</text>
+        <polygon points="765,96 773,90 781,96 773,102" fill="#fffbeb" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="790" y="100" font-size="9" fill="#64748b">Gateway</text>
+        <rect x="756" y="110" width="18" height="11" rx="3" fill="#fffbeb" stroke="#fde68a" stroke-width="1.5"/>
+        <text x="780" y="120" font-size="9" fill="#64748b">User Task</text>
+        <circle cx="765" cy="137" r="5" fill="none" stroke="#059669" stroke-width="2"/>
+        <circle cx="765" cy="137" r="2.5" fill="#059669"/>
+        <text x="778" y="141" font-size="9" fill="#64748b">End (Approved)</text>
+        <circle cx="765" cy="156" r="5" fill="none" stroke="#C8102E" stroke-width="2"/>
+        <circle cx="765" cy="156" r="2.5" fill="#C8102E"/>
+        <text x="778" y="160" font-size="9" fill="#64748b">End (Rejected)</text>
       </svg>
     </div>
-    <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;">
-      <span class="pill pill-blue">⚡ Parallel Fork/Join — 3 async tasks run simultaneously</span>
-      <span class="pill pill-amber">⏱ 4-hour SLA timer on Manual Review</span>
-      <span class="pill pill-red">🔀 3-way exclusive gateway routing</span>
-      <span class="pill pill-gray">14 BPMN activities · BPMN 2.0 ISO standard</span>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+      <span class="pill pb">⚡ Parallel Fork/Join — 3 async tasks simultaneously</span>
+      <span class="pill pa">⏱ 4-hour SLA timer on Manual Review</span>
+      <span class="pill pr">14 BPMN activities · BPMN 2.0 ISO standard</span>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════ SLIDE 6 — PARALLEL PROCESSING -->
+<!-- ── 6. PARALLEL PROCESSING ────────────────────────────── -->
 <div class="slide">
-  <div class="slide-content">
-    <h2 class="section-title">Parallel <span>Processing</span> in Action</h2>
-    <div class="divider"></div>
-    <div class="grid-2" style="margin-top:24px;gap:24px;">
+  <div class="content">
+    <h2>Parallel <span>Processing</span> in Action</h2><div class="bar"></div>
+    <div class="grid2" style="gap:24px">
       <div>
-        <div style="font-size:13px;font-weight:700;color:var(--rak-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:14px;">Without Parallel (Sequential)</div>
-        <div style="display:flex;flex-direction:column;gap:6px;">
-          <div style="font-size:11px;color:var(--rak-muted);margin-bottom:4px;">Total time: ~6.5 seconds</div>
-          {[
-            ['Fircosoft AML',  '2500ms', '38%', '#C8102E'],
-            ['AECB Credit',    '2200ms', '34%', '#C8102E'],
-            ['ThreatMetrix',   '1800ms', '28%', '#C8102E'],
-          ].map(([l,t,w,c]) => `
-            <div style="margin-bottom:4px;">
-              <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
-                <span style="font-size:12px;color:var(--rak-text);">${l}</span>
-                <span style="font-size:11px;color:var(--rak-muted);">${t}</span>
-              </div>
-              <div class="bar-track"><div class="bar-fill" style="background:${c};--target:${w};width:0;">${t}</div></div>
-            </div>`).join('')}
-          <div style="margin-top:10px;padding:10px;background:#FEF2F4;border-radius:8px;border:1px solid #FECDD3;">
-            <div style="font-size:12px;font-weight:700;color:var(--rak-red);">Total: 6,500ms</div>
-            <div style="font-size:11px;color:var(--rak-muted);">Sum of all steps</div>
-          </div>
+        <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:12px">Without Parallel (Sequential) — 6.5s total</div>
+        <div class="btrack"><div class="bfill" style="width:38%;background:#C8102E">Fircosoft 2500ms</div></div>
+        <div class="btrack"><div class="bfill" style="width:34%;background:#C8102E">AECB 2200ms</div></div>
+        <div class="btrack"><div class="bfill" style="width:28%;background:#C8102E">ThreatMetrix 1800ms</div></div>
+        <div style="padding:10px;background:#fef2f4;border-radius:8px;border:1px solid #fecdd3;margin-top:8px">
+          <b style="color:#C8102E">Total: 6,500ms</b> — sum of all steps
         </div>
       </div>
       <div>
-        <div style="font-size:13px;font-weight:700;color:var(--rak-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:14px;">With Flowable Parallel Gateway ✓</div>
-        <div style="display:flex;flex-direction:column;gap:6px;">
-          <div style="font-size:11px;color:var(--rak-muted);margin-bottom:4px;">All 3 run simultaneously</div>
-          {[
-            ['Fircosoft AML',  '2500ms', '97%', '#059669'],
-            ['AECB Credit',    '2200ms', '85%', '#059669'],
-            ['ThreatMetrix',   '1800ms', '70%', '#059669'],
-          ].map(([l,t,w,c]) => `
-            <div style="margin-bottom:4px;">
-              <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
-                <span style="font-size:12px;color:var(--rak-text);">${l}</span>
-                <span style="font-size:11px;color:var(--rak-muted);">${t}</span>
-              </div>
-              <div class="bar-track"><div class="bar-fill" style="background:${c};--target:${w};width:0;">${t}</div></div>
-            </div>`).join('')}
-          <div style="margin-top:10px;padding:10px;background:#F0FDF4;border-radius:8px;border:1px solid #BBF7D0;">
-            <div style="font-size:12px;font-weight:700;color:var(--rak-green);">Total: 2,500ms</div>
-            <div style="font-size:11px;color:var(--rak-muted);">Max of all steps — not sum</div>
-          </div>
+        <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:12px">With Flowable Parallel Gateway ✓ — 2.5s total</div>
+        <div class="btrack"><div class="bfill" style="width:97%;background:#059669">Fircosoft 2500ms</div></div>
+        <div class="btrack"><div class="bfill" style="width:85%;background:#059669">AECB 2200ms</div></div>
+        <div class="btrack"><div class="bfill" style="width:70%;background:#059669">ThreatMetrix 1800ms</div></div>
+        <div style="padding:10px;background:#f0fdf4;border-radius:8px;border:1px solid #bbf7d0;margin-top:8px">
+          <b style="color:#059669">Total: 2,500ms</b> — max of all steps, not sum
         </div>
       </div>
     </div>
-    <div style="margin-top:20px;display:flex;gap:12px;">
-      <div class="callout callout-green" style="flex:1;">
-        <strong>61% faster</strong> — 3 async tasks on Flowable's thread pool. BPMN parallel gateway: 2 XML attributes (<code>async="true"</code> <code>exclusive="false"</code>). Zero code change needed.
+    <div style="margin-top:20px;display:flex;gap:14px;align-items:stretch">
+      <div class="callout g" style="flex:3">
+        <b>61% faster</b> — Flowable's async executor runs all 3 tasks on separate threads simultaneously.
+        Enabled by 2 BPMN attributes: <code>flowable:async="true"</code> and <code>flowable:exclusive="false"</code>. Zero code change needed — pure BPMN configuration.
       </div>
-      <div class="card" style="text-align:center;padding:20px;min-width:160px;">
-        <div class="stat-num">61%</div>
-        <div class="stat-label">Faster Screening</div>
+      <div class="card" style="text-align:center;padding:20px;flex:1">
+        <div class="big">61%</div>
+        <div class="muted">Faster Screening</div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════ SLIDE 7 — CAPABILITIES 1 -->
+<!-- ── 7. KEY CAPABILITIES ───────────────────────────────── -->
 <div class="slide">
-  <div class="slide-content">
-    <h2 class="section-title">Key <span>Capabilities</span> Demonstrated</h2>
-    <div class="divider"></div>
-    <div class="grid-3" style="margin-top:24px;">
-      {[
-        ['⚡','Parallel Processing','Fircosoft + AECB + ThreatMetrix run simultaneously via BPMN parallel gateway. 61% faster than sequential.','blue'],
-        ['🔥','Hot Deployment','Deploy a new BPMN version in < 30 seconds. Running instances continue on old version. No restart.','red'],
-        ['🛡️','Fault Tolerance','Async tasks persisted to DB before execution. Server crash? Restart auto-recovers all in-flight processes.','green'],
-        ['👤','Human Task Management','PEP-detected applications route to compliance/RM groups. SLA timer escalates to Senior Manager after 4 hours.','amber'],
-        ['📊','Full Audit Trail','Every activity, variable, decision, and user action timestamped. HistoryService REST API for compliance.','purple'],
-        ['🎯','DMN Decision Tables','Business rules in visual decision tables — no code deploy needed to change approval thresholds.','gray'],
-      ].map(([i,t,d,c]) => {
-        const colors = {
-          blue:'#EFF6FF|#BFDBFE|#2563EB', red:'#FEF2F4|#FECDD3|#C8102E',
-          green:'#F0FDF4|#BBF7D0|#059669', amber:'#FFFBEB|#FDE68A|#D97706',
-          purple:'#F5F3FF|#DDD6FE|#7C3AED', gray:'var(--rak-light)|var(--rak-border)|var(--rak-muted)'
-        };
-        const [bg,br,tc] = colors[c].split('|');
-        return `<div class="card" style="border-top:3px solid ${tc};">
-          <div style="font-size:28px;margin-bottom:8px;">${i}</div>
-          <div style="font-weight:700;color:var(--rak-text);margin-bottom:6px;">${t}</div>
-          <p style="font-size:12px;color:var(--rak-muted);line-height:1.5;">${d}</p>
-        </div>`;
-      }).join('')}
+  <div class="content">
+    <h2>Key <span>Capabilities</span> Demonstrated</h2><div class="bar"></div>
+    <div class="grid3">
+      <div class="card tag-b"><div style="font-size:26px;margin-bottom:6px">⚡</div><b>Parallel Processing</b><p class="muted" style="margin-top:4px;line-height:1.5">3 async tasks via BPMN parallel gateway. 61% faster than sequential.</p></div>
+      <div class="card tag-r"><div style="font-size:26px;margin-bottom:6px">🔥</div><b>Hot Deployment</b><p class="muted" style="margin-top:4px;line-height:1.5">New BPMN version in &lt;30s. Running instances unaffected. No restart.</p></div>
+      <div class="card tag-g"><div style="font-size:26px;margin-bottom:6px">🛡️</div><b>Fault Tolerance</b><p class="muted" style="margin-top:4px;line-height:1.5">Jobs persisted to DB before execution. Server crash auto-recovers on restart.</p></div>
+      <div class="card tag-a"><div style="font-size:26px;margin-bottom:6px">👤</div><b>Human Task Management</b><p class="muted" style="margin-top:4px;line-height:1.5">PEP cases route to compliance/RM groups. 4-hour SLA escalation timer.</p></div>
+      <div class="card tag-p"><div style="font-size:26px;margin-bottom:6px">📊</div><b>Full Audit Trail</b><p class="muted" style="margin-top:4px;line-height:1.5">Every activity, variable, and decision timestamped. HistoryService REST API.</p></div>
+      <div class="card" style="border-top:3px solid #059669"><div style="font-size:26px;margin-bottom:6px">🎯</div><b>DMN Decision Tables</b><p class="muted" style="margin-top:4px;line-height:1.5">Business rules in visual tables. Change approval thresholds — no code deploy.</p></div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════ SLIDE 8 — DEMO SCENARIOS -->
+<!-- ── 8. DEMO SCENARIOS ──────────────────────────────────── -->
 <div class="slide">
-  <div class="slide-content">
-    <h2 class="section-title">Demo <span>Scenarios</span></h2>
-    <div class="divider"></div>
-    <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px;">
-      {[
-        ['01','Happy Path — Auto Approve','Al Noor Trading LLC · Khalid Al Mansouri · MAINLAND','All 3 screenings PASS · Risk LOW · AUTO_APPROVE · EFR Filing · Account Created','~8-10s','green'],
-        ['02','Sanctions Hit — Auto Reject','Global Exchange Corp · Ahmad Rasheed · FREEZONE','Fircosoft: OFAC SDN exact match · Rule R-003 fires · AUTO_REJECT immediately','~5s','red'],
-        ['03','Manual Review — PEP Detected','Prime Capital Holdings · Mohammed Al Rashidi · OFFSHORE','Fircosoft: PEP Level-2 · Risk HIGH · MANUAL_REVIEW · Task Inbox · 4h SLA timer','~8s to task','amber'],
-        ['04','Credit Fail — AECB Reject','Horizon Ventures LLC · Fatima Al Zaabi · MAINLAND','AECB: active defaults AED 2.4M · Credit score 320 < 650 · AUTO_REJECT','~8s','red'],
-        ['05','Bulk Launch — 5 Concurrent','5 companies · Mixed scenarios · Async executor','15 concurrent external API calls · All complete independently · No bottleneck','~10-12s','purple'],
-      ].map(([n,t,co,d,dur,c]) => {
-        const colors = {green:'#F0FDF4|#BBF7D0|#059669',red:'#FEF2F4|#FECDD3|#C8102E',amber:'#FFFBEB|#FDE68A|#D97706',purple:'#F5F3FF|#DDD6FE|#7C3AED'};
-        const [bg,br,tc] = colors[c].split('|');
-        return `<div style="display:flex;gap:14px;align-items:center;padding:12px 16px;background:var(--rak-white);border-radius:10px;border:1px solid var(--rak-border);border-left:4px solid ${tc};">
-          <div style="font-size:20px;font-weight:800;color:${tc};opacity:.3;width:28px;flex-shrink:0;">${n}</div>
-          <div style="flex:1;">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
-              <span style="font-weight:700;font-size:13px;">${t}</span>
-              <span style="font-size:11px;color:var(--rak-muted);">${co}</span>
-            </div>
-            <div style="font-size:12px;color:var(--rak-muted);">${d}</div>
-          </div>
-          <div style="text-align:right;flex-shrink:0;">
-            <div style="font-size:12px;font-weight:700;color:${tc};">${dur}</div>
-            <div style="font-size:10px;color:var(--rak-muted);">duration</div>
-          </div>
-        </div>`;
-      }).join('')}
+  <div class="content">
+    <h2>Demo <span>Scenarios</span></h2><div class="bar"></div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div class="row green" style="border-left:4px solid #059669"><span style="font-size:16px;font-weight:800;color:#059669;opacity:.4;width:24px;flex-shrink:0">01</span><div style="flex:1"><b>Happy Path — Auto Approve</b><span class="muted" style="margin-left:8px">All 3 screenings PASS · Risk LOW · AUTO_APPROVE · EFR + Account Created</span></div><span class="pill pg">~8-10s</span></div>
+      <div class="row red" style="border-left:4px solid #C8102E"><span style="font-size:16px;font-weight:800;color:#C8102E;opacity:.4;width:24px;flex-shrink:0">02</span><div style="flex:1"><b>Sanctions Hit — Auto Reject</b><span class="muted" style="margin-left:8px">Fircosoft: OFAC SDN exact match · Rule R-003 · AUTO_REJECT immediately</span></div><span class="pill pr">~5s</span></div>
+      <div class="row amber" style="border-left:4px solid #d97706"><span style="font-size:16px;font-weight:800;color:#d97706;opacity:.4;width:24px;flex-shrink:0">03</span><div style="flex:1"><b>Manual Review — PEP Detected</b><span class="muted" style="margin-left:8px">Fircosoft: PEP Level-2 · Risk HIGH · MANUAL_REVIEW · Task Inbox · 4h SLA</span></div><span class="pill pa">~8s</span></div>
+      <div class="row red" style="border-left:4px solid #ea580c"><span style="font-size:16px;font-weight:800;color:#ea580c;opacity:.4;width:24px;flex-shrink:0">04</span><div style="flex:1"><b>Credit Fail — AECB Reject</b><span class="muted" style="margin-left:8px">AECB: defaults AED 2.4M · Score 320 &lt; 650 threshold · AUTO_REJECT</span></div><span class="pill pr">~8s</span></div>
+      <div class="row" style="border-left:4px solid #7c3aed;background:#f5f3ff;border-color:#ddd6fe"><span style="font-size:16px;font-weight:800;color:#7c3aed;opacity:.4;width:24px;flex-shrink:0">05</span><div style="flex:1"><b>Bulk Launch — 5 Concurrent</b><span class="muted" style="margin-left:8px">5 processes × 3 parallel screenings = 15 concurrent API calls · No bottleneck</span></div><span class="pill pp">~10-12s</span></div>
     </div>
-    <div style="margin-top:14px;" class="callout">
-      <strong>Live demo:</strong> All 5 scenarios run from the React UI at <code>localhost:3000/demo</code>. Process timeline auto-updates every 2 seconds. Task Inbox shows real-time pending reviews.
+    <div class="callout" style="margin-top:14px">
+      <b>Live demo:</b> All 5 scenarios run from the React UI at <code>localhost:3000/demo</code>. Process timeline auto-updates every 2 seconds.
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════ SLIDE 9 — COMPARISON 1 -->
+<!-- ── 9. COMPARISON PART 1 ───────────────────────────────── -->
 <div class="slide">
-  <div class="slide-content">
-    <h2 class="section-title">Flowable vs Newgen iBPS — <span>Part 1</span></h2>
-    <div class="divider"></div>
-    <div class="card" style="padding:0;overflow:hidden;margin-top:20px;">
-      <table class="comp-table">
-        <thead>
-          <tr>
-            <th style="width:24%;">Feature</th>
-            <th style="width:36%;color:#059669;">✦ Flowable BPM</th>
-            <th style="width:30%;">Newgen iBPS</th>
-            <th style="width:10%;">Winner</th>
-          </tr>
-        </thead>
+  <div class="content">
+    <h2>Flowable vs Newgen iBPS — <span>Part 1</span></h2><div class="bar"></div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table class="cmp">
+        <thead><tr><th style="width:22%">Feature</th><th style="width:38%;color:#059669">✦ Flowable BPM</th><th style="width:30%">Newgen iBPS</th><th>Winner</th></tr></thead>
         <tbody>
-          {[
-            ['BPMN 2.0 Compliance','Full ISO standard — portable, tool-agnostic, open','Proprietary extensions — vendor lock-in','flowable'],
-            ['Open Source / Cost','Apache 2.0 — zero license cost, full source access','Commercial license — high TCO, per-seat model','flowable'],
-            ['Hot Process Deploy','Deploy new version without restart. Old instances continue on v1, new on v2.','Typically requires server restart or maintenance window','flowable'],
-            ['Parallel / Async','Native async executor + parallel gateways. True concurrent execution.','Limited async — primarily sequential task execution','flowable'],
-            ['Microservice Fit','Embeds as library in Spring Boot — no separate BPM server required','Requires dedicated iBPS application server','flowable'],
-            ['REST API First','Full REST API out-of-box for every process, task, history operation','REST requires additional adapter configuration','flowable'],
-            ['Process Versioning','Automatic — v1/v2 coexist. Old cases unaffected, new on latest.','Manual version management with migration scripts','flowable'],
-            ['Developer Experience','Standard Java/Spring — any dev can contribute. No proprietary IDE.','Requires Newgen Studio IDE. Steep learning curve.','flowable'],
-          ].map(([f,fl,ng,w]) => `
-            <tr>
-              <td style="font-weight:600;font-size:12px;">${f}</td>
-              <td class="${w==='flowable'?'win':'lose'}" style="font-size:12px;">${w==='flowable'?'✓ ':''} ${fl}</td>
-              <td class="lose" style="font-size:12px;">${ng}</td>
-              <td style="text-align:center;">${w==='flowable'?'<span class="pill pill-green" style="font-size:10px;padding:2px 8px;">Flowable</span>':'<span style="font-size:10px;color:#64748B;">–</span>'}</td>
-            </tr>`).join('')}
+          <tr><td style="font-weight:600">BPMN 2.0 Compliance</td><td class="win">✓ Full ISO standard — portable, tool-agnostic</td><td style="color:#64748b">Proprietary extensions — vendor lock-in</td><td><span class="pill pg" style="font-size:10px">Flowable</span></td></tr>
+          <tr><td style="font-weight:600">Open Source / Cost</td><td class="win">✓ Apache 2.0 — zero license cost</td><td style="color:#64748b">Commercial license — high TCO</td><td><span class="pill pg" style="font-size:10px">Flowable</span></td></tr>
+          <tr><td style="font-weight:600">Hot Deployment</td><td class="win">✓ Deploy without restart. Old instances on v1.</td><td style="color:#64748b">Requires server restart / maintenance window</td><td><span class="pill pg" style="font-size:10px">Flowable</span></td></tr>
+          <tr><td style="font-weight:600">Parallel / Async</td><td class="win">✓ Native async executor + parallel gateways</td><td style="color:#64748b">Limited async — primarily sequential</td><td><span class="pill pg" style="font-size:10px">Flowable</span></td></tr>
+          <tr><td style="font-weight:600">Microservice Fit</td><td class="win">✓ Embeds in Spring Boot — no separate server</td><td style="color:#64748b">Requires dedicated iBPS application server</td><td><span class="pill pg" style="font-size:10px">Flowable</span></td></tr>
+          <tr><td style="font-weight:600">REST API First</td><td class="win">✓ Full REST API out-of-box for all operations</td><td style="color:#64748b">REST requires additional adapter config</td><td><span class="pill pg" style="font-size:10px">Flowable</span></td></tr>
+          <tr><td style="font-weight:600">Process Versioning</td><td class="win">✓ Automatic — v1/v2 coexist in same DB</td><td style="color:#64748b">Manual version management</td><td><span class="pill pg" style="font-size:10px">Flowable</span></td></tr>
+          <tr><td style="font-weight:600">Developer Experience</td><td class="win">✓ Standard Java/Spring — any IDE, any dev</td><td style="color:#64748b">Requires Newgen Studio IDE</td><td><span class="pill pg" style="font-size:10px">Flowable</span></td></tr>
         </tbody>
       </table>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════ SLIDE 10 — COMPARISON 2 -->
+<!-- ── 10. COMPARISON PART 2 ──────────────────────────────── -->
 <div class="slide">
-  <div class="slide-content">
-    <h2 class="section-title">Flowable vs Newgen iBPS — <span>Part 2</span></h2>
-    <div class="divider"></div>
-    <div class="card" style="padding:0;overflow:hidden;margin-top:20px;">
-      <table class="comp-table">
-        <thead>
-          <tr>
-            <th style="width:24%;">Feature</th>
-            <th style="width:36%;color:#059669;">✦ Flowable BPM</th>
-            <th style="width:30%;">Newgen iBPS</th>
-            <th style="width:10%;">Winner</th>
-          </tr>
-        </thead>
+  <div class="content">
+    <h2>Flowable vs Newgen iBPS — <span>Part 2</span></h2><div class="bar"></div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table class="cmp">
+        <thead><tr><th style="width:22%">Feature</th><th style="width:38%;color:#059669">✦ Flowable BPM</th><th style="width:30%">Newgen iBPS</th><th>Winner</th></tr></thead>
         <tbody>
-          {[
-            ['Cloud Native','First-class Docker/Kubernetes. Spring Boot Actuator health checks built-in.','Heavy J2EE footprint — challenging to containerise','flowable'],
-            ['Audit & History','Built-in full audit trail — every variable, task, timer recorded. History API.','Available but requires separate configuration module','both'],
-            ['Human Task Mgmt','Built-in — candidate groups, SLA timers, escalation, reassignment via BPMN','Comprehensive workflow with forms — mature product','both'],
-            ['DMN Decision Tables','Native DMN 1.2 — business-friendly decision rules alongside BPMN','Business rules module — separate licensing required','flowable'],
-            ['Process Simulation','Available in Flowable Enterprise edition (paid)','Built-in simulation in Studio — advantage here','newgen'],
-            ['Time to Change','Edit BPMN → redeploy in < 30 seconds. No code change for routing.','Studio → test cycle → iBPS admin deploy — hours','flowable'],
-            ['Resilience','Async jobs in DB — restart recovers all in-flight tasks automatically','Depends on JBoss/WebSphere clustering setup','flowable'],
-          ].map(([f,fl,ng,w]) => `
-            <tr>
-              <td style="font-weight:600;font-size:12px;">${f}</td>
-              <td class="${w==='flowable'||w==='both'?'win':'lose'}" style="font-size:12px;">${fl}</td>
-              <td class="${w==='newgen'||w==='both'?'win':'lose'}" style="font-size:12px;">${ng}</td>
-              <td style="text-align:center;">${
-                w==='flowable'?'<span class="pill pill-green" style="font-size:10px;padding:2px 8px;">Flowable</span>':
-                w==='newgen'?'<span class="pill pill-blue" style="font-size:10px;padding:2px 8px;">Newgen</span>':
-                '<span style="font-size:10px;color:#64748B;">Equal</span>'
-              }</td>
-            </tr>`).join('')}
+          <tr><td style="font-weight:600">Cloud Native</td><td class="win">✓ First-class Docker/Kubernetes. Spring Actuator.</td><td style="color:#64748b">Heavy J2EE footprint — hard to containerise</td><td><span class="pill pg" style="font-size:10px">Flowable</span></td></tr>
+          <tr><td style="font-weight:600">Audit &amp; History</td><td class="win">✓ Built-in — every variable, task, timer recorded</td><td style="color:#64748b">Available but requires separate config</td><td><span class="pill pz" style="font-size:10px">Equal</span></td></tr>
+          <tr><td style="font-weight:600">Human Task Mgmt</td><td class="win">✓ Candidate groups, SLA timers, escalation</td><td style="color:#64748b">Comprehensive workflow with forms — mature</td><td><span class="pill pz" style="font-size:10px">Equal</span></td></tr>
+          <tr><td style="font-weight:600">DMN Decision Tables</td><td class="win">✓ Native DMN 1.2 alongside BPMN</td><td style="color:#64748b">Separate licensing required</td><td><span class="pill pg" style="font-size:10px">Flowable</span></td></tr>
+          <tr><td style="font-weight:600">Process Simulation</td><td style="color:#64748b">Flowable Enterprise edition only</td><td class="win">✓ Built-in simulation in Studio</td><td><span class="pill pb" style="font-size:10px">Newgen</span></td></tr>
+          <tr><td style="font-weight:600">Time to Change</td><td class="win">✓ Edit BPMN → redeploy in &lt; 30 seconds</td><td style="color:#64748b">Studio → test → admin deploy — hours</td><td><span class="pill pg" style="font-size:10px">Flowable</span></td></tr>
+          <tr><td style="font-weight:600">Resilience</td><td class="win">✓ Jobs in DB — restart auto-recovers all tasks</td><td style="color:#64748b">Depends on JBoss/WebSphere clustering</td><td><span class="pill pg" style="font-size:10px">Flowable</span></td></tr>
         </tbody>
       </table>
     </div>
-    <div style="margin-top:14px;display:flex;gap:12px;">
-      <div class="card" style="flex:1;text-align:center;border-top:3px solid #059669;">
-        <div style="font-size:2rem;font-weight:800;color:var(--rak-green);">12</div>
-        <div style="font-size:12px;color:var(--rak-muted);">Flowable Wins</div>
+    <div style="display:flex;gap:12px;margin-top:12px">
+      <div class="card" style="text-align:center;flex:1;border-top:3px solid #059669"><div class="big">12</div><div class="muted">Flowable wins</div></div>
+      <div class="card" style="text-align:center;flex:1"><div class="big" style="color:#64748b">2</div><div class="muted">Equal</div></div>
+      <div class="card" style="text-align:center;flex:1;border-top:3px solid #2563eb"><div class="big" style="color:#2563eb">1</div><div class="muted">Newgen wins</div></div>
+      <div class="callout g" style="flex:3">Flowable wins every dimension that matters for RAKBANK's microservices strategy: cost, portability, parallel processing, and cloud-native deployment.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 11. 54 TABLES DESIGN ───────────────────────────────── -->
+<div class="slide">
+  <div class="content">
+    <h2>Why <span>54 Tables</span>? The Database Design</h2><div class="bar"></div>
+    <div class="grid4" style="gap:10px">
+      <div class="card" style="background:#eff6ff;border-color:#bfdbfe"><code style="font-size:10px;color:#2563eb">ACT_GE_*</code><div style="font-weight:700;margin:4px 0">General</div><div style="font-size:11px;font-weight:600;color:#C8102E">2 tables</div><div class="muted" style="font-size:11px">Property store, byte-array blobs</div></div>
+      <div class="card" style="background:#f5f3ff;border-color:#ddd6fe"><code style="font-size:10px;color:#7c3aed">ACT_RE_*</code><div style="font-weight:700;margin:4px 0">Repository</div><div style="font-size:11px;font-weight:600;color:#C8102E">3 tables</div><div class="muted" style="font-size:11px">Process defs, deployments, resources</div></div>
+      <div class="card" style="background:#fef2f4;border-color:#fecdd3"><code style="font-size:10px;color:#C8102E">ACT_RU_*</code><div style="font-weight:700;margin:4px 0">Runtime</div><div style="font-size:11px;font-weight:600;color:#C8102E">13 tables</div><div class="muted" style="font-size:11px">Live executions, jobs, tasks, vars</div></div>
+      <div class="card" style="background:#f0fdf4;border-color:#bbf7d0"><code style="font-size:10px;color:#059669">ACT_HI_*</code><div style="font-weight:700;margin:4px 0">History</div><div style="font-size:11px;font-weight:600;color:#C8102E">10 tables</div><div class="muted" style="font-size:11px">Complete audit — every step, variable</div></div>
+      <div class="card" style="background:#fffbeb;border-color:#fde68a"><code style="font-size:10px;color:#d97706">ACT_ID_*</code><div style="font-weight:700;margin:4px 0">Identity</div><div style="font-size:11px;font-weight:600;color:#C8102E">8 tables</div><div class="muted" style="font-size:11px">Users, groups, memberships, tokens</div></div>
+      <div class="card" style="background:#f0f9ff;border-color:#bae6fd"><code style="font-size:10px;color:#0284c7">ACT_DMN_*</code><div style="font-weight:700;margin:4px 0">DMN</div><div style="font-size:11px;font-weight:600;color:#C8102E">5 tables</div><div class="muted" style="font-size:11px">Decision tables, deployments, history</div></div>
+      <div class="card" style="background:#fff7ed;border-color:#fed7aa"><code style="font-size:10px;color:#ea580c">FLW_*</code><div style="font-weight:700;margin:4px 0">Flow</div><div style="font-size:11px;font-weight:600;color:#C8102E">6 tables</div><div class="muted" style="font-size:11px">Event log, channel defs, app config</div></div>
+      <div class="card" style="background:#f0fdf4;border-color:#bbf7d0"><code style="font-size:10px;color:#059669">ACT_FO_*</code><div style="font-weight:700;margin:4px 0">Forms</div><div style="font-size:11px;font-weight:600;color:#C8102E">4 tables</div><div class="muted" style="font-size:11px">Form definitions, instances, values</div></div>
+    </div>
+    <div style="margin-top:12px;display:flex;gap:12px">
+      <div class="callout" style="flex:3">
+        <b>Why separated?</b> Prevents queue contention. <code>ACT_RU_*</code> (hot) vs <code>ACT_HI_*</code> (cold/archive) can be on different storage tiers. 5 job table types avoid lock contention between immediate, scheduled, and suspended jobs.
       </div>
-      <div class="card" style="flex:1;text-align:center;border-top:3px solid #64748B;">
-        <div style="font-size:2rem;font-weight:800;color:var(--rak-muted);">2</div>
-        <div style="font-size:12px;color:var(--rak-muted);">Equal</div>
-      </div>
-      <div class="card" style="flex:1;text-align:center;border-top:3px solid var(--rak-blue);">
-        <div style="font-size:2rem;font-weight:800;color:var(--rak-blue);">1</div>
-        <div style="font-size:12px;color:var(--rak-muted);">Newgen Wins</div>
-      </div>
-      <div class="callout callout-green" style="flex:3;">
-        <strong>Verdict:</strong> Flowable wins on every dimension that matters for RAKBANK's microservices strategy: cost, portability, parallel processing, and cloud-native deployment.
+      <div class="card" style="flex:1;text-align:center;padding:16px">
+        <div class="big">54</div><div class="muted">Total Tables</div>
+        <div style="font-size:11px;color:#64748b;margin-top:6px">8 module groups</div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════ SLIDE 11 — 54 TABLES -->
+<!-- ── 12. 54 TABLES REALITY CHECK ────────────────────────── -->
 <div class="slide">
-  <div class="slide-content">
-    <h2 class="section-title">Why <span>54 Tables</span>? The Database Design</h2>
-    <div class="divider"></div>
-    <div class="grid-4" style="margin-top:20px;gap:10px;">
-      {[
-        ['ACT_GE_*','General','2 tables','Property store, byte-array blobs','#EFF6FF','#BFDBFE'],
-        ['ACT_RE_*','Repository','3 tables','Process defs, deployments, resources','#F5F3FF','#DDD6FE'],
-        ['ACT_RU_*','Runtime','13 tables','Live executions, jobs, tasks, variables','#FEF2F4','#FECDD3'],
-        ['ACT_HI_*','History','10 tables','Complete audit — every step, variable','#F0FDF4','#BBF7D0'],
-        ['ACT_ID_*','Identity','8 tables','Users, groups, memberships, tokens','#FFFBEB','#FDE68A'],
-        ['ACT_DMN_*','DMN','5 tables','Decision tables, deployments, history','#F0F9FF','#BAE6FD'],
-        ['FLW_*','Flow','6 tables','Event log, channel defs, app config','#FFF7ED','#FED7AA'],
-        ['ACT_FO_*','Forms','4 tables','Form definitions, instances, values','#F0FDF4','#BBF7D0'],
-      ].map(([p,n,c,d,bg,br]) => `
-        <div class="db-group" style="background:${bg};border-color:${br};">
-          <div style="font-family:monospace;font-size:11px;font-weight:700;margin-bottom:4px;">${p}</div>
-          <div style="font-size:13px;font-weight:700;margin-bottom:2px;">${n}</div>
-          <div style="font-size:11px;font-weight:600;color:var(--rak-red);margin-bottom:4px;">${c}</div>
-          <div style="font-size:11px;color:var(--rak-muted);">${d}</div>
-        </div>`).join('')}
-    </div>
-    <div style="margin-top:14px;display:flex;gap:10px;">
-      <div class="callout" style="flex:2;">
-        <strong>Why separated?</strong> Separation prevents queue contention. Runtime (<code>ACT_RU_*</code>) tables are hot — high read/write. History (<code>ACT_HI_*</code>) tables grow unbounded and can be archived to cold storage. Job tables (<code>ACT_RU_JOB</code>, <code>ACT_RU_TIMER_JOB</code>) are separated to avoid lock contention between immediate vs scheduled jobs.
-      </div>
-      <div class="card" style="flex:1;text-align:center;">
-        <div class="stat-num">54</div>
-        <div class="stat-label">Total Tables</div>
-        <div style="margin-top:8px;font-size:11px;color:var(--rak-muted);">Across 8 module groups</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════════════════════ SLIDE 12 — 54 TABLES REALITY CHECK -->
-<div class="slide">
-  <div class="slide-content">
-    <h2 class="section-title">The 54-Table <span>Reality Check</span></h2>
-    <div class="divider"></div>
-    <div class="grid-2" style="margin-top:22px;gap:20px;">
-      <!-- Wrong assumption -->
+  <div class="content">
+    <h2>The 54-Table <span>Reality Check</span></h2><div class="bar"></div>
+    <div class="grid2">
       <div>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-          <span style="font-size:20px;">❌</span>
-          <div style="font-size:13px;font-weight:700;color:var(--rak-red);">The Assumption (Incorrect)</div>
-        </div>
-        <div style="background:#FEF2F4;border:1px solid #FECDD3;border-radius:10px;padding:16px;margin-bottom:12px;">
-          <div style="font-size:13px;font-weight:600;color:var(--rak-text);margin-bottom:8px;">"54 tables × N microservices = huge overhead"</div>
-          <svg viewBox="0 0 300 120" width="100%" style="display:block;">
-            {[0,1,2,3].map((i) => `
-              <rect x="${10+i*68}" y="20" width="58" height="36" rx="6" fill="white" stroke="#FECDD3" stroke-width="1.5"/>
-              <text x="${39+i*68}" y="36" text-anchor="middle" font-size="8" fill="#C8102E" font-weight="600">Squad ${String.fromCharCode(65+i)}</text>
-              <text x="${39+i*68}" y="48" text-anchor="middle" font-size="7" fill="#64748B">MS + Flowable</text>
-              <rect x="${10+i*68}" y="64" width="58" height="24" rx="4" fill="#FEF2F4" stroke="#FECDD3" stroke-width="1"/>
-              <text x="${39+i*68}" y="76" text-anchor="middle" font-size="7" fill="#C8102E">54 tables</text>
-              <text x="${39+i*68}" y="87" text-anchor="middle" font-size="7" fill="#64748B">own DB</text>
-              <line x1="${39+i*68}" y1="56" x2="${39+i*68}" y2="64" stroke="#FECDD3" stroke-width="1.5"/>`).join('')}
-            <text x="150" y="108" text-anchor="middle" font-size="9" fill="#C8102E" font-weight="600">= 4 × 54 = 216 tables?!</text>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><span style="font-size:18px">❌</span><b style="color:#C8102E">Wrong Assumption</b></div>
+        <div style="background:#fef2f4;border:1px solid #fecdd3;border-radius:10px;padding:14px;margin-bottom:10px">
+          <b style="font-size:13px">"54 tables × N microservices = huge overhead"</b>
+          <svg viewBox="0 0 300 100" width="100%" style="display:block;margin-top:10px">
+            <rect x="10" y="10" width="56" height="30" rx="5" fill="#fff" stroke="#fecdd3" stroke-width="1.5"/>
+            <text x="38" y="24" text-anchor="middle" font-size="8" fill="#C8102E" font-weight="600">Squad A MS</text>
+            <rect x="10" y="44" width="56" height="16" rx="3" fill="#fef2f4" stroke="#fecdd3"/>
+            <text x="38" y="55" text-anchor="middle" font-size="7" fill="#C8102E">54 tables</text>
+            <rect x="80" y="10" width="56" height="30" rx="5" fill="#fff" stroke="#fecdd3" stroke-width="1.5"/>
+            <text x="108" y="24" text-anchor="middle" font-size="8" fill="#C8102E" font-weight="600">Squad B MS</text>
+            <rect x="80" y="44" width="56" height="16" rx="3" fill="#fef2f4" stroke="#fecdd3"/>
+            <text x="108" y="55" text-anchor="middle" font-size="7" fill="#C8102E">54 tables</text>
+            <rect x="150" y="10" width="56" height="30" rx="5" fill="#fff" stroke="#fecdd3" stroke-width="1.5"/>
+            <text x="178" y="24" text-anchor="middle" font-size="8" fill="#C8102E" font-weight="600">Squad C MS</text>
+            <rect x="150" y="44" width="56" height="16" rx="3" fill="#fef2f4" stroke="#fecdd3"/>
+            <text x="178" y="55" text-anchor="middle" font-size="7" fill="#C8102E">54 tables</text>
+            <text x="150" y="85" text-anchor="middle" font-size="9" fill="#C8102E" font-weight="600">= 3 × 54 = 162 tables?!</text>
           </svg>
         </div>
-        <div style="font-size:12px;color:var(--rak-muted);padding:10px;background:var(--rak-light);border-radius:8px;">
-          This assumes every microservice gets its own embedded Flowable with its own DB schema. This is an anti-pattern, not how enterprises deploy BPM.
-        </div>
+        <div class="muted" style="padding:8px;background:#f8f9fa;border-radius:6px">This assumes every microservice gets its own embedded Flowable with its own DB schema. This is an anti-pattern.</div>
       </div>
-      <!-- Correct model -->
       <div>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-          <span style="font-size:20px;">✅</span>
-          <div style="font-size:13px;font-weight:700;color:var(--rak-green);">The Reality (Correct)</div>
-        </div>
-        <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:16px;margin-bottom:12px;">
-          <div style="font-size:13px;font-weight:600;color:var(--rak-text);margin-bottom:8px;">"54 tables once per environment — shared by all"</div>
-          <svg viewBox="0 0 300 120" width="100%" style="display:block;">
-            <!-- Central platform -->
-            <rect x="90" y="8" width="120" height="40" rx="8" fill="white" stroke="#BBF7D0" stroke-width="2"/>
-            <text x="150" y="24" text-anchor="middle" font-size="9" fill="#059669" font-weight="700">Flowable Platform</text>
-            <text x="150" y="36" text-anchor="middle" font-size="8" fill="#64748B">54 tables (ONCE)</text>
-            <!-- DB -->
-            <rect x="112" y="52" width="76" height="20" rx="4" fill="#F0FDF4" stroke="#BBF7D0" stroke-width="1.5"/>
-            <text x="150" y="65" text-anchor="middle" font-size="8" fill="#059669">PostgreSQL</text>
-            <!-- Lines to squads -->
-            {[30,100,170,240].map((x,i) => `
-              <line x1="150" y1="72" x2="${x+24}" y2="92" stroke="#BBF7D0" stroke-width="1.5" stroke-dasharray="3,2"/>
-              <rect x="${x}" y="92" width="48" height="22" rx="4" fill="white" stroke="#BBF7D0" stroke-width="1"/>
-              <text x="${x+24}" y="104" text-anchor="middle" font-size="8" fill="#059669">Squad ${String.fromCharCode(65+i)}</text>
-              <text x="${x+24}" y="114" text-anchor="middle" font-size="7" fill="#64748B">worker</text>`).join('')}
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><span style="font-size:18px">✅</span><b style="color:#059669">The Reality</b></div>
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;margin-bottom:10px">
+          <b style="font-size:13px">"54 tables ONCE per environment — shared by all squads"</b>
+          <svg viewBox="0 0 300 100" width="100%" style="display:block;margin-top:10px">
+            <rect x="90" y="8" width="120" height="30" rx="6" fill="#fff" stroke="#bbf7d0" stroke-width="2"/>
+            <text x="150" y="22" text-anchor="middle" font-size="9" fill="#059669" font-weight="700">Flowable Platform</text>
+            <text x="150" y="33" text-anchor="middle" font-size="8" fill="#64748b">54 tables — ONCE</text>
+            <line x1="38" y1="78" x2="150" y2="38" stroke="#bbf7d0" stroke-width="1.5" stroke-dasharray="3,2"/>
+            <line x1="108" y1="78" x2="150" y2="38" stroke="#bbf7d0" stroke-width="1.5" stroke-dasharray="3,2"/>
+            <line x1="192" y1="78" x2="150" y2="38" stroke="#bbf7d0" stroke-width="1.5" stroke-dasharray="3,2"/>
+            <line x1="262" y1="78" x2="150" y2="38" stroke="#bbf7d0" stroke-width="1.5" stroke-dasharray="3,2"/>
+            <rect x="10" y="78" width="56" height="18" rx="4" fill="#f0fdf4" stroke="#bbf7d0"/>
+            <text x="38" y="90" text-anchor="middle" font-size="8" fill="#059669">Squad A</text>
+            <rect x="80" y="78" width="56" height="18" rx="4" fill="#f0fdf4" stroke="#bbf7d0"/>
+            <text x="108" y="90" text-anchor="middle" font-size="8" fill="#059669">Squad B</text>
+            <rect x="164" y="78" width="56" height="18" rx="4" fill="#f0fdf4" stroke="#bbf7d0"/>
+            <text x="192" y="90" text-anchor="middle" font-size="8" fill="#059669">Squad C</text>
+            <rect x="234" y="78" width="56" height="18" rx="4" fill="#f0fdf4" stroke="#bbf7d0"/>
+            <text x="262" y="90" text-anchor="middle" font-size="8" fill="#059669">Squad D</text>
           </svg>
         </div>
-        <div style="font-size:12px;color:var(--rak-muted);padding:10px;background:#F0FDF4;border-radius:8px;border:1px solid #BBF7D0;">
-          One Flowable platform serves all squads. 54 tables exist once per environment (dev/staging/prod). Analogy: you don't deploy a separate PostgreSQL instance per microservice.
-        </div>
+        <div style="font-size:12px;padding:8px;background:#f0fdf4;border-radius:6px;border:1px solid #bbf7d0">One Flowable cluster serves all teams. Processes isolated by <code>tenantId</code>. 3 environments × 54 = <b>162 tables total for the entire bank</b>.</div>
       </div>
     </div>
-    <div style="margin-top:14px;" class="callout callout-green">
-      <strong>Key insight:</strong> Just like a shared message broker (Kafka) or API gateway — the BPM engine is a shared platform service. 3 environments × 54 tables = <strong>162 tables total for the entire bank</strong>, not 54 per service.
+    <div class="callout g" style="margin-top:12px">
+      <b>Analogy:</b> You don't deploy a separate PostgreSQL or Kafka instance per microservice. Same principle — Flowable is a shared platform service. Like Kafka, it scales horizontally, not by multiplication.
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════ SLIDE 13 — INDUSTRY PATTERNS -->
+<!-- ── 13. HOW INDUSTRY MANAGES BPM ──────────────────────── -->
 <div class="slide">
-  <div class="slide-content">
-    <h2 class="section-title">How Industry Manages <span>BPM at Scale</span></h2>
-    <div class="divider"></div>
-    <div class="grid-2" style="margin-top:20px;gap:20px;">
-      <!-- Patterns -->
-      <div style="display:flex;flex-direction:column;gap:12px;">
-        <div style="font-size:12px;font-weight:700;color:var(--rak-muted);text-transform:uppercase;letter-spacing:.05em;">Industry Deployment Patterns</div>
-        {[
-          ['01','Centralised BPM Platform','One Flowable cluster (Flowable Work) serves all teams. Each squad deploys their BPMN definitions to the same engine. Tables shared, processes isolated by tenantId.','blue'],
-          ['02','External Worker Pattern','Microservices register as "job workers" — they poll the central Flowable engine for tasks and execute them. Flowable orchestrates, microservices execute.','green'],
-          ['03','Multi-Tenancy','Flowable native tenantId on process definitions, tasks and history. One schema, multiple logical tenants — onboarding, lending, trade-finance each isolated.','amber'],
-          ['04','History Archival','ACT_HI_* tables grow over time. Industry practice: archive completed process history to a data lake (S3/BigQuery) after 90 days. Keep ACT_RU_* lean.','purple'],
-        ].map(([n,t,d,c]) => {
-          const colors = {blue:'#EFF6FF|#BFDBFE|#2563EB',green:'#F0FDF4|#BBF7D0|#059669',amber:'#FFFBEB|#FDE68A|#D97706',purple:'#F5F3FF|#DDD6FE|#7C3AED'};
-          const [bg,br,tc] = colors[c].split('|');
-          return `<div style="display:flex;gap:12px;padding:12px;background:${bg};border-radius:10px;border:1px solid ${br};">
-            <div style="font-size:18px;font-weight:800;color:${tc};opacity:.4;flex-shrink:0;width:24px;">${n}</div>
-            <div>
-              <div style="font-weight:700;font-size:13px;color:${tc};margin-bottom:3px;">${t}</div>
-              <div style="font-size:12px;color:var(--rak-muted);">${d}</div>
-            </div>
-          </div>`;
-        }).join('')}
+  <div class="content">
+    <h2>How Industry Manages <span>BPM at Scale</span></h2><div class="bar"></div>
+    <div class="grid2">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:2px">Deployment Patterns</div>
+        <div class="row blue"><span style="font-size:14px;font-weight:800;color:#2563eb;opacity:.4;width:22px;flex-shrink:0">01</span><div><b>Centralised BPM Platform</b><div class="muted">One Flowable Work cluster serves all teams. Each squad deploys their BPMN to the same engine. Processes isolated by tenantId.</div></div></div>
+        <div class="row green"><span style="font-size:14px;font-weight:800;color:#059669;opacity:.4;width:22px;flex-shrink:0">02</span><div><b>External Worker Pattern</b><div class="muted">Microservices register as job workers — they poll the central engine for tasks. Flowable orchestrates, microservices execute.</div></div></div>
+        <div class="row amber"><span style="font-size:14px;font-weight:800;color:#d97706;opacity:.4;width:22px;flex-shrink:0">03</span><div><b>Multi-Tenancy</b><div class="muted">Native tenantId on process definitions, tasks, history. Onboarding, lending, trade-finance isolated in same 54 tables.</div></div></div>
+        <div class="row" style="background:#f5f3ff;border-color:#ddd6fe"><span style="font-size:14px;font-weight:800;color:#7c3aed;opacity:.4;width:22px;flex-shrink:0">04</span><div><b>History Archival</b><div class="muted">Archive ACT_HI_* to S3/data lake after 90 days. Keep ACT_RU_* lean and fast.</div></div></div>
       </div>
-      <!-- Real-world examples -->
-      <div style="display:flex;flex-direction:column;gap:12px;">
-        <div style="font-size:12px;font-weight:700;color:var(--rak-muted);text-transform:uppercase;letter-spacing:.05em;">Enterprise Examples</div>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:10px">Banks Using Flowable</div>
         <div class="card">
-          <div style="font-size:13px;font-weight:700;margin-bottom:8px;">Financial Institutions Using Flowable</div>
-          {[
-            ['ING Bank','Retail banking workflows — mortgage origination, KYC, account opening. Central Flowable Work cluster.'],
-            ['ABN AMRO','Trade finance automation. Flowable for complex multi-party approval chains.'],
-            ['Allianz','Insurance claim processing. 200+ process definitions in single Flowable instance.'],
-            ['T-Systems','Telco provisioning. 50 million process instances per year, one engine cluster.'],
-          ].map(([co,d]) => `
-            <div style="padding:8px 0;border-bottom:1px solid var(--rak-border);">
-              <div style="font-weight:600;font-size:12px;color:var(--rak-text);">${co}</div>
-              <div style="font-size:11px;color:var(--rak-muted);margin-top:2px;">${d}</div>
-            </div>`).join('')}
-          <div style="padding-top:8px;font-size:11px;color:var(--rak-muted);">Source: Flowable customer case studies</div>
+          <div style="display:flex;flex-direction:column;gap:0">
+            <div style="padding:8px 0;border-bottom:1px solid #f1f5f9"><b style="font-size:12px">ING Bank</b><div class="muted">Mortgage origination, KYC, account opening. Central Flowable Work cluster.</div></div>
+            <div style="padding:8px 0;border-bottom:1px solid #f1f5f9"><b style="font-size:12px">ABN AMRO</b><div class="muted">Trade finance automation. Complex multi-party approval chains.</div></div>
+            <div style="padding:8px 0;border-bottom:1px solid #f1f5f9"><b style="font-size:12px">Allianz</b><div class="muted">Insurance claim processing. 200+ process definitions in one instance.</div></div>
+            <div style="padding:8px 0"><b style="font-size:12px">T-Systems</b><div class="muted">50 million process instances per year. One engine cluster.</div></div>
+          </div>
         </div>
-        <div class="callout callout-blue">
-          <strong>Flowable Work</strong> is the enterprise management layer — web UI for process monitoring, deployment, task management, and reporting — without writing any code.
+        <div class="callout" style="margin-top:10px">
+          <b>Flowable Work</b> is the enterprise management layer — deploy, monitor, task management, reporting — without any code.
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════ SLIDE 14 — MULTI-SQUAD ARCHITECTURE -->
+<!-- ── 14. MULTI-SQUAD ARCHITECTURE ──────────────────────── -->
 <div class="slide">
-  <div class="slide-content" style="padding-top:58px;">
-    <h2 class="section-title">Multi-Squad <span>Deployment Architecture</span></h2>
-    <div class="divider" style="margin-bottom:14px;"></div>
-    <div class="card" style="padding:16px;">
-      <svg viewBox="0 0 1020 340" width="100%" style="display:block;max-height:280px;">
-        <!-- ── PLATFORM ZONE ── -->
-        <rect x="10" y="10" width="1000" height="148" rx="10" fill="#F0FDF4" stroke="#BBF7D0" stroke-width="2" stroke-dasharray="6,3"/>
-        <text x="20" y="28" font-size="11" fill="#059669" font-weight="700">Enterprise BPM Platform  (1 × PostgreSQL schema = 54 tables per environment)</text>
-
-        <!-- Flowable Engine nodes -->
-        <rect x="30" y="38" width="160" height="52" rx="8" fill="white" stroke="#BBF7D0" stroke-width="1.5"/>
-        <text x="110" y="56" text-anchor="middle" font-size="10" fill="#059669" font-weight="700">Flowable Engine</text>
-        <text x="110" y="70" text-anchor="middle" font-size="9" fill="#64748B">Node 1  (async executor)</text>
-        <text x="110" y="82" text-anchor="middle" font-size="8" fill="#64748B">processes: onboarding, lending, cards</text>
-
-        <rect x="210" y="38" width="160" height="52" rx="8" fill="white" stroke="#BBF7D0" stroke-width="1.5"/>
-        <text x="290" y="56" text-anchor="middle" font-size="10" fill="#059669" font-weight="700">Flowable Engine</text>
-        <text x="290" y="70" text-anchor="middle" font-size="9" fill="#64748B">Node 2  (async executor)</text>
-        <text x="290" y="82" text-anchor="middle" font-size="8" fill="#64748B">same DB — clustered job pickup</text>
-
+  <div class="content" style="padding-top:8px">
+    <h2>Multi-Squad <span>Deployment Architecture</span></h2><div class="bar" style="margin-bottom:12px"></div>
+    <div class="card" style="padding:14px">
+      <svg viewBox="0 0 980 300" width="100%" style="display:block">
+        <!-- Platform zone -->
+        <rect x="8" y="8" width="964" height="130" rx="10" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="2" stroke-dasharray="6,3"/>
+        <text x="18" y="26" font-size="10" fill="#059669" font-weight="700">Enterprise BPM Platform — 54 tables exist ONCE (per environment)</text>
+        <!-- Engine 1 -->
+        <rect x="24" y="34" width="156" height="48" rx="7" fill="#fff" stroke="#bbf7d0" stroke-width="1.5"/>
+        <text x="102" y="52" text-anchor="middle" font-size="9" fill="#059669" font-weight="700">Flowable Engine Node 1</text>
+        <text x="102" y="64" text-anchor="middle" font-size="8" fill="#64748b">async executor</text>
+        <text x="102" y="76" text-anchor="middle" font-size="7" fill="#64748b">onboarding · lending · cards</text>
+        <!-- Engine 2 -->
+        <rect x="196" y="34" width="156" height="48" rx="7" fill="#fff" stroke="#bbf7d0" stroke-width="1.5"/>
+        <text x="274" y="52" text-anchor="middle" font-size="9" fill="#059669" font-weight="700">Flowable Engine Node 2</text>
+        <text x="274" y="64" text-anchor="middle" font-size="8" fill="#64748b">async executor (clustered)</text>
+        <text x="274" y="76" text-anchor="middle" font-size="7" fill="#64748b">same DB — distributed job pickup</text>
         <!-- Flowable Work -->
-        <rect x="390" y="38" width="160" height="52" rx="8" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1.5"/>
-        <text x="470" y="56" text-anchor="middle" font-size="10" fill="#2563EB" font-weight="700">Flowable Work UI</text>
-        <text x="470" y="70" text-anchor="middle" font-size="9" fill="#64748B">Admin · Monitor · Deploy</text>
-        <text x="470" y="82" text-anchor="middle" font-size="8" fill="#64748B">BPMN modeler, task mgmt, reporting</text>
-
+        <rect x="368" y="34" width="156" height="48" rx="7" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+        <text x="446" y="52" text-anchor="middle" font-size="9" fill="#2563eb" font-weight="700">Flowable Work UI</text>
+        <text x="446" y="64" text-anchor="middle" font-size="8" fill="#64748b">Admin · Monitor · Deploy</text>
+        <text x="446" y="76" text-anchor="middle" font-size="7" fill="#64748b">BPMN modeler · task mgmt · reports</text>
         <!-- PostgreSQL -->
-        <rect x="570" y="38" width="200" height="52" rx="8" fill="#FFFBEB" stroke="#FDE68A" stroke-width="2"/>
-        <text x="670" y="54" text-anchor="middle" font-size="10" fill="#D97706" font-weight="700">PostgreSQL  (54 tables)</text>
-        <text x="670" y="67" text-anchor="middle" font-size="9" fill="#64748B">ACT_RU_* · ACT_HI_* · ACT_RE_*</text>
-        <text x="670" y="79" text-anchor="middle" font-size="9" fill="#64748B">ACT_ID_* · ACT_DMN_* · FLW_*</text>
-        <text x="670" y="91" text-anchor="middle" font-size="8" fill="#D97706">SHARED by ALL squads · ONCE per env</text>
-
+        <rect x="540" y="34" width="200" height="48" rx="7" fill="#fffbeb" stroke="#fde68a" stroke-width="2"/>
+        <text x="640" y="50" text-anchor="middle" font-size="10" fill="#d97706" font-weight="700">PostgreSQL (54 tables)</text>
+        <text x="640" y="62" text-anchor="middle" font-size="8" fill="#64748b">ACT_RU_* · ACT_HI_* · ACT_RE_*</text>
+        <text x="640" y="74" text-anchor="middle" font-size="8" fill="#64748b">ACT_ID_* · ACT_DMN_* · FLW_*</text>
+        <text x="640" y="86" text-anchor="middle" font-size="7" fill="#d97706" font-weight="600">SHARED · ALL squads · ONCE per env</text>
         <!-- Monitoring -->
-        <rect x="790" y="38" width="200" height="52" rx="8" fill="#F5F3FF" stroke="#DDD6FE" stroke-width="1.5"/>
-        <text x="890" y="54" text-anchor="middle" font-size="10" fill="#7C3AED" font-weight="700">Monitoring &amp; Ops</text>
-        <text x="890" y="67" text-anchor="middle" font-size="9" fill="#64748B">Grafana · Spring Actuator</text>
-        <text x="890" y="79" text-anchor="middle" font-size="9" fill="#64748B">Kafka events · ELK logging</text>
-        <text x="890" y="91" text-anchor="middle" font-size="8" fill="#7C3AED">process metrics · SLA dashboards</text>
+        <rect x="756" y="34" width="200" height="48" rx="7" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="1.5"/>
+        <text x="856" y="52" text-anchor="middle" font-size="9" fill="#7c3aed" font-weight="700">Monitoring</text>
+        <text x="856" y="64" text-anchor="middle" font-size="8" fill="#64748b">Grafana · Actuator · ELK</text>
+        <text x="856" y="76" text-anchor="middle" font-size="7" fill="#64748b">process metrics · SLA dashboards</text>
+        <!-- DB lines -->
+        <line x1="102" y1="82" x2="102" y2="108" stroke="#bbf7d0" stroke-width="1.5"/>
+        <line x1="274" y1="82" x2="274" y2="108" stroke="#bbf7d0" stroke-width="1.5"/>
+        <line x1="102" y1="108" x2="640" y2="108" stroke="#bbf7d0" stroke-width="1.5"/>
+        <line x1="274" y1="108" x2="640" y2="108" stroke="#bbf7d0" stroke-width="1.5"/>
+        <line x1="640" y1="82" x2="640" y2="108" stroke="#fde68a" stroke-width="2"/>
+        <!-- REST boundary -->
+        <line x1="8" y1="144" x2="972" y2="144" stroke="#e2e8f0" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <text x="490" y="157" text-anchor="middle" font-size="9" fill="#64748b" font-weight="600">REST API / External Worker Protocol / BPMN Deploy API</text>
+        <!-- Squad boxes -->
+        <rect x="20" y="168" width="174" height="116" rx="8" fill="#fff" stroke="#fecdd3" stroke-width="1.5"/>
+        <rect x="20" y="168" width="174" height="20" rx="8" fill="#fef2f4" stroke="none"/>
+        <text x="107" y="182" text-anchor="middle" font-size="9" fill="#C8102E" font-weight="700">Squad A — Onboarding</text>
+        <text x="107" y="198" text-anchor="middle" font-size="8" fill="#64748b">account-onboarding.bpmn20.xml</text>
+        <text x="107" y="210" text-anchor="middle" font-size="8" fill="#C8102E">v1 + v2 coexist in same engine</text>
+        <text x="107" y="222" text-anchor="middle" font-size="8" fill="#64748b">Fircosoft · AECB · ThreatMetrix</text>
+        <text x="107" y="234" text-anchor="middle" font-size="8" fill="#64748b">EFR · Account Creation delegates</text>
+        <text x="107" y="276" text-anchor="middle" font-size="7" fill="#94a3b8">tenantId: onboarding</text>
+        <line x1="107" y1="168" x2="200" y2="144" stroke="#fecdd3" stroke-width="1.5"/>
 
-        <!-- DB connections -->
-        <line x1="110" y1="90" x2="110" y2="118" stroke="#BBF7D0" stroke-width="1.5"/>
-        <line x1="290" y1="90" x2="290" y2="118" stroke="#BBF7D0" stroke-width="1.5"/>
-        <line x1="110" y1="118" x2="670" y2="118" stroke="#BBF7D0" stroke-width="1.5"/>
-        <line x1="290" y1="118" x2="670" y2="118" stroke="#BBF7D0" stroke-width="1.5"/>
-        <line x1="670" y1="90" x2="670" y2="118" stroke="#FDE68A" stroke-width="2"/>
+        <rect x="210" y="168" width="174" height="116" rx="8" fill="#fff" stroke="#bfdbfe" stroke-width="1.5"/>
+        <rect x="210" y="168" width="174" height="20" rx="8" fill="#eff6ff" stroke="none"/>
+        <text x="297" y="182" text-anchor="middle" font-size="9" fill="#2563eb" font-weight="700">Squad B — Lending</text>
+        <text x="297" y="198" text-anchor="middle" font-size="8" fill="#64748b">loan-origination.bpmn20.xml</text>
+        <text x="297" y="210" text-anchor="middle" font-size="8" fill="#2563eb">credit assessment · legal review</text>
+        <text x="297" y="222" text-anchor="middle" font-size="8" fill="#64748b">multi-level approval workflow</text>
+        <text x="297" y="234" text-anchor="middle" font-size="8" fill="#64748b">DMN: loan pricing rules</text>
+        <text x="297" y="276" text-anchor="middle" font-size="7" fill="#94a3b8">tenantId: lending</text>
+        <line x1="297" y1="168" x2="380" y2="144" stroke="#bfdbfe" stroke-width="1.5"/>
 
-        <!-- REST API boundary -->
-        <line x1="10" y1="162" x2="1010" y2="162" stroke="#E2E8F0" stroke-width="1.5" stroke-dasharray="4,3"/>
-        <text x="520" y="176" text-anchor="middle" font-size="10" fill="#64748B" font-weight="600">REST API  /  External Worker Protocol  /  BPMN Deploy</text>
+        <rect x="400" y="168" width="174" height="116" rx="8" fill="#fff" stroke="#bbf7d0" stroke-width="1.5"/>
+        <rect x="400" y="168" width="174" height="20" rx="8" fill="#f0fdf4" stroke="none"/>
+        <text x="487" y="182" text-anchor="middle" font-size="9" fill="#059669" font-weight="700">Squad C — Trade Finance</text>
+        <text x="487" y="198" text-anchor="middle" font-size="8" fill="#64748b">lc-issuance.bpmn20.xml</text>
+        <text x="487" y="210" text-anchor="middle" font-size="8" fill="#059669">Letter of Credit · bank guarantees</text>
+        <text x="487" y="222" text-anchor="middle" font-size="8" fill="#64748b">SWIFT integration · multi-party</text>
+        <text x="487" y="234" text-anchor="middle" font-size="8" fill="#64748b">compliance · correspondent bank</text>
+        <text x="487" y="276" text-anchor="middle" font-size="7" fill="#94a3b8">tenantId: trade-finance</text>
+        <line x1="487" y1="168" x2="560" y2="144" stroke="#bbf7d0" stroke-width="1.5"/>
 
-        <!-- ── SQUAD SERVICES ── -->
-        <!-- Squad A - Onboarding -->
-        <rect x="20" y="192" width="190" height="120" rx="10" fill="white" stroke="#FECDD3" stroke-width="2"/>
-        <rect x="20" y="192" width="190" height="24" rx="10" fill="#FEF2F4" stroke="none"/>
-        <text x="115" y="208" text-anchor="middle" font-size="10" fill="#C8102E" font-weight="700">Squad A — Onboarding</text>
-        <text x="115" y="226" text-anchor="middle" font-size="9" fill="#64748B">OnboardingService.java</text>
-        <text x="115" y="240" text-anchor="middle" font-size="8" fill="#C8102E">account-onboarding.bpmn20.xml</text>
-        <text x="115" y="253" text-anchor="middle" font-size="8" fill="#64748B">v1, v2 coexist in same engine</text>
-        <text x="115" y="266" text-anchor="middle" font-size="8" fill="#64748B">FircosoftDelegate, AECBDelegate</text>
-        <text x="115" y="279" text-anchor="middle" font-size="8" fill="#64748B">ThreatMatrixDelegate → workers</text>
-        <text x="115" y="295" text-anchor="middle" font-size="7" fill="#94A3B8">tenantId: onboarding</text>
-        <line x1="115" y1="192" x2="200" y2="162" stroke="#FECDD3" stroke-width="1.5"/>
+        <rect x="590" y="168" width="174" height="116" rx="8" fill="#fff" stroke="#ddd6fe" stroke-width="1.5"/>
+        <rect x="590" y="168" width="174" height="20" rx="8" fill="#f5f3ff" stroke="none"/>
+        <text x="677" y="182" text-anchor="middle" font-size="9" fill="#7c3aed" font-weight="700">Squad D — Cards</text>
+        <text x="677" y="198" text-anchor="middle" font-size="8" fill="#64748b">card-lifecycle.bpmn20.xml</text>
+        <text x="677" y="210" text-anchor="middle" font-size="8" fill="#7c3aed">issuance · disputes · upgrades</text>
+        <text x="677" y="222" text-anchor="middle" font-size="8" fill="#64748b">Visa/MC network integration</text>
+        <text x="677" y="234" text-anchor="middle" font-size="8" fill="#64748b">chargeback automation</text>
+        <text x="677" y="276" text-anchor="middle" font-size="7" fill="#94a3b8">tenantId: cards</text>
+        <line x1="677" y1="168" x2="740" y2="144" stroke="#ddd6fe" stroke-width="1.5"/>
 
-        <!-- Squad B - Lending -->
-        <rect x="228" y="192" width="190" height="120" rx="10" fill="white" stroke="#BFDBFE" stroke-width="2"/>
-        <rect x="228" y="192" width="190" height="24" rx="10" fill="#EFF6FF" stroke="none"/>
-        <text x="323" y="208" text-anchor="middle" font-size="10" fill="#2563EB" font-weight="700">Squad B — Lending</text>
-        <text x="323" y="226" text-anchor="middle" font-size="9" fill="#64748B">LoanOriginationService.java</text>
-        <text x="323" y="240" text-anchor="middle" font-size="8" fill="#2563EB">loan-origination.bpmn20.xml</text>
-        <text x="323" y="253" text-anchor="middle" font-size="8" fill="#64748B">credit assessment, legal review</text>
-        <text x="323" y="266" text-anchor="middle" font-size="8" fill="#64748B">multi-level approval workflow</text>
-        <text x="323" y="279" text-anchor="middle" font-size="8" fill="#64748B">DMN: loan pricing rules</text>
-        <text x="323" y="295" text-anchor="middle" font-size="7" fill="#94A3B8">tenantId: lending</text>
-        <line x1="323" y1="192" x2="400" y2="162" stroke="#BFDBFE" stroke-width="1.5"/>
+        <rect x="780" y="168" width="184" height="116" rx="8" fill="#fff" stroke="#fed7aa" stroke-width="1.5"/>
+        <rect x="780" y="168" width="184" height="20" rx="8" fill="#fff7ed" stroke="none"/>
+        <text x="872" y="182" text-anchor="middle" font-size="9" fill="#ea580c" font-weight="700">Squad E — RegOps</text>
+        <text x="872" y="198" text-anchor="middle" font-size="8" fill="#64748b">kyc-refresh.bpmn20.xml</text>
+        <text x="872" y="210" text-anchor="middle" font-size="8" fill="#ea580c">periodic KYC refresh</text>
+        <text x="872" y="222" text-anchor="middle" font-size="8" fill="#64748b">sanctions rescreening</text>
+        <text x="872" y="234" text-anchor="middle" font-size="8" fill="#64748b">CBUAE regulatory filings</text>
+        <text x="872" y="276" text-anchor="middle" font-size="7" fill="#94a3b8">tenantId: regops</text>
+        <line x1="872" y1="168" x2="900" y2="144" stroke="#fed7aa" stroke-width="1.5"/>
 
-        <!-- Squad C - Trade Finance -->
-        <rect x="436" y="192" width="190" height="120" rx="10" fill="white" stroke="#BBF7D0" stroke-width="2"/>
-        <rect x="436" y="192" width="190" height="24" rx="10" fill="#F0FDF4" stroke="none"/>
-        <text x="531" y="208" text-anchor="middle" font-size="10" fill="#059669" font-weight="700">Squad C — Trade Finance</text>
-        <text x="531" y="226" text-anchor="middle" font-size="9" fill="#64748B">TradeFinanceService.java</text>
-        <text x="531" y="240" text-anchor="middle" font-size="8" fill="#059669">lc-issuance.bpmn20.xml</text>
-        <text x="531" y="253" text-anchor="middle" font-size="8" fill="#64748B">Letter of Credit, bank guarantees</text>
-        <text x="531" y="266" text-anchor="middle" font-size="8" fill="#64748B">multi-party SWIFT integration</text>
-        <text x="531" y="279" text-anchor="middle" font-size="8" fill="#64748B">compliance + correspondent bank</text>
-        <text x="531" y="295" text-anchor="middle" font-size="7" fill="#94A3B8">tenantId: trade-finance</text>
-        <line x1="531" y1="192" x2="580" y2="162" stroke="#BBF7D0" stroke-width="1.5"/>
-
-        <!-- Squad D - Cards -->
-        <rect x="644" y="192" width="180" height="120" rx="10" fill="white" stroke="#DDD6FE" stroke-width="2"/>
-        <rect x="644" y="192" width="180" height="24" rx="10" fill="#F5F3FF" stroke="none"/>
-        <text x="734" y="208" text-anchor="middle" font-size="10" fill="#7C3AED" font-weight="700">Squad D — Cards</text>
-        <text x="734" y="226" text-anchor="middle" font-size="9" fill="#64748B">CardIssuanceService.java</text>
-        <text x="734" y="240" text-anchor="middle" font-size="8" fill="#7C3AED">card-lifecycle.bpmn20.xml</text>
-        <text x="734" y="253" text-anchor="middle" font-size="8" fill="#64748B">card issuance, disputes, upgrades</text>
-        <text x="734" y="266" text-anchor="middle" font-size="8" fill="#64748B">Visa/MC network integration</text>
-        <text x="734" y="279" text-anchor="middle" font-size="8" fill="#64748B">chargeback process automation</text>
-        <text x="734" y="295" text-anchor="middle" font-size="7" fill="#94A3B8">tenantId: cards</text>
-        <line x1="734" y1="192" x2="760" y2="162" stroke="#DDD6FE" stroke-width="1.5"/>
-
-        <!-- Squad E - RegOps -->
-        <rect x="842" y="192" width="168" height="120" rx="10" fill="white" stroke="#FED7AA" stroke-width="2"/>
-        <rect x="842" y="192" width="168" height="24" rx="10" fill="#FFF7ED" stroke="none"/>
-        <text x="926" y="208" text-anchor="middle" font-size="10" fill="#EA580C" font-weight="700">Squad E — RegOps</text>
-        <text x="926" y="226" text-anchor="middle" font-size="9" fill="#64748B">ComplianceService.java</text>
-        <text x="926" y="240" text-anchor="middle" font-size="8" fill="#EA580C">kyc-refresh.bpmn20.xml</text>
-        <text x="926" y="253" text-anchor="middle" font-size="8" fill="#64748B">periodic KYC refresh</text>
-        <text x="926" y="266" text-anchor="middle" font-size="8" fill="#64748B">sanctions rescreening</text>
-        <text x="926" y="279" text-anchor="middle" font-size="8" fill="#64748B">CBUAE regulatory filings</text>
-        <text x="926" y="295" text-anchor="middle" font-size="7" fill="#94A3B8">tenantId: regops</text>
-        <line x1="926" y1="192" x2="920" y2="162" stroke="#FED7AA" stroke-width="1.5"/>
-
-        <!-- Key insight label -->
-        <rect x="10" y="320" width="1000" height="16" rx="4" fill="#F0FDF4" stroke="#BBF7D0" stroke-width="1"/>
-        <text x="520" y="331" text-anchor="middle" font-size="9" fill="#059669" font-weight="700">All 5 squads share the same 54 tables. Each squad deploys its own BPMN definitions as versioned rows in ACT_RE_PROCDEF. Zero schema duplication.</text>
+        <!-- Footer note -->
+        <rect x="8" y="288" width="964" height="10" rx="3" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1"/>
+        <text x="490" y="296" text-anchor="middle" font-size="8" fill="#059669" font-weight="600">All 5 squads share the same 54 tables. Each squad's processes are versioned rows in ACT_RE_PROCDEF. Zero schema duplication.</text>
       </svg>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════ SLIDE 15 — NEWGEN vs FLOWABLE DEPLOYMENT -->
+<!-- ── 15. NEWGEN vs FLOWABLE DEPLOYMENT ─────────────────── -->
 <div class="slide">
-  <div class="slide-content">
-    <h2 class="section-title">Deployment Architecture: <span>Newgen iBPS vs Flowable</span></h2>
-    <div class="divider"></div>
-    <div class="grid-2" style="margin-top:20px;gap:20px;">
-      <!-- Newgen -->
+  <div class="content">
+    <h2>Deployment: <span>Newgen iBPS vs Flowable</span></h2><div class="bar"></div>
+    <div class="grid2">
       <div>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-          <div style="width:8px;height:8px;border-radius:50%;background:var(--rak-blue);"></div>
-          <div style="font-size:13px;font-weight:700;color:var(--rak-blue);">Newgen iBPS Architecture</div>
-        </div>
-        <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:16px;">
-          <svg viewBox="0 0 280 180" width="100%" style="display:block;">
-            <!-- Central iBPS server -->
-            <rect x="80" y="10" width="120" height="50" rx="8" fill="white" stroke="#BFDBFE" stroke-width="2"/>
-            <text x="140" y="30" text-anchor="middle" font-size="10" fill="#2563EB" font-weight="700">Newgen iBPS Server</text>
-            <text x="140" y="43" text-anchor="middle" font-size="8" fill="#64748B">JBoss / WebSphere</text>
-            <text x="140" y="55" text-anchor="middle" font-size="8" fill="#2563EB">Centralised monolith</text>
-            <!-- DB -->
-            <rect x="95" y="68" width="90" height="22" rx="4" fill="white" stroke="#BFDBFE" stroke-width="1.5"/>
-            <text x="140" y="82" text-anchor="middle" font-size="8" fill="#2563EB">iBPS Database</text>
-            <line x1="140" y1="60" x2="140" y2="68" stroke="#BFDBFE" stroke-width="1.5"/>
-            <!-- Clients -->
-            {[30,105,180,245].map((x,i) => `
-              <rect x="${x}" y="106" width="50" height="28" rx="4" fill="white" stroke="#BFDBFE" stroke-width="1"/>
-              <text x="${x+25}" y="118" text-anchor="middle" font-size="8" fill="#2563EB">Team ${i+1}</text>
-              <text x="${x+25}" y="128" text-anchor="middle" font-size="7" fill="#64748B">client</text>
-              <line x1="${x+25}" y1="106" x2="140" y2="90" stroke="#BFDBFE" stroke-width="1" stroke-dasharray="3,2"/>`).join('')}
-            <!-- Studio -->
-            <rect x="60" y="150" width="160" height="24" rx="4" fill="#FFF7ED" stroke="#FED7AA" stroke-width="1.5"/>
-            <text x="140" y="166" text-anchor="middle" font-size="8" fill="#EA580C">Newgen Studio IDE required</text>
+        <div style="font-size:12px;font-weight:700;color:#2563eb;margin-bottom:10px">Newgen iBPS Architecture</div>
+        <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:14px">
+          <svg viewBox="0 0 280 160" width="100%" style="display:block">
+            <rect x="80" y="10" width="120" height="44" rx="7" fill="#fff" stroke="#bfdbfe" stroke-width="2"/>
+            <text x="140" y="28" text-anchor="middle" font-size="9" fill="#2563eb" font-weight="700">Newgen iBPS Server</text>
+            <text x="140" y="40" text-anchor="middle" font-size="8" fill="#64748b">JBoss / WebSphere</text>
+            <text x="140" y="52" text-anchor="middle" font-size="7" fill="#2563eb">Centralised monolith</text>
+            <rect x="95" y="60" width="90" height="18" rx="4" fill="#fff" stroke="#bfdbfe" stroke-width="1.5"/>
+            <text x="140" y="72" text-anchor="middle" font-size="8" fill="#2563eb">iBPS DB schema</text>
+            <line x1="140" y1="54" x2="140" y2="60" stroke="#bfdbfe" stroke-width="1.5"/>
+            <line x1="35" y1="96" x2="140" y2="78" stroke="#bfdbfe" stroke-width="1" stroke-dasharray="3,2"/>
+            <line x1="95" y1="96" x2="140" y2="78" stroke="#bfdbfe" stroke-width="1" stroke-dasharray="3,2"/>
+            <line x1="185" y1="96" x2="140" y2="78" stroke="#bfdbfe" stroke-width="1" stroke-dasharray="3,2"/>
+            <line x1="245" y1="96" x2="140" y2="78" stroke="#bfdbfe" stroke-width="1" stroke-dasharray="3,2"/>
+            <rect x="10" y="96" width="50" height="20" rx="4" fill="#fff" stroke="#bfdbfe" stroke-width="1"/>
+            <text x="35" y="110" text-anchor="middle" font-size="8" fill="#2563eb">Team 1</text>
+            <rect x="70" y="96" width="50" height="20" rx="4" fill="#fff" stroke="#bfdbfe" stroke-width="1"/>
+            <text x="95" y="110" text-anchor="middle" font-size="8" fill="#2563eb">Team 2</text>
+            <rect x="160" y="96" width="50" height="20" rx="4" fill="#fff" stroke="#bfdbfe" stroke-width="1"/>
+            <text x="185" y="110" text-anchor="middle" font-size="8" fill="#2563eb">Team 3</text>
+            <rect x="220" y="96" width="50" height="20" rx="4" fill="#fff" stroke="#bfdbfe" stroke-width="1"/>
+            <text x="245" y="110" text-anchor="middle" font-size="8" fill="#2563eb">Team 4</text>
+            <rect x="60" y="130" width="160" height="20" rx="4" fill="#fff7ed" stroke="#fed7aa" stroke-width="1.5"/>
+            <text x="140" y="144" text-anchor="middle" font-size="8" fill="#ea580c">Newgen Studio IDE required for all changes</text>
           </svg>
-          <div style="font-size:12px;color:var(--rak-muted);margin-top:8px;">
-            <div style="margin-bottom:4px;"><strong>Architecture:</strong> Single central iBPS server. All teams connect to it.</div>
-            <div style="margin-bottom:4px;"><strong>DB schema:</strong> Proprietary tables. Similar footprint to Flowable's 54.</div>
-            <div style="margin-bottom:4px;"><strong>Scaling:</strong> JBoss/WAS clustering — complex, expensive.</div>
-            <div><strong>Changes:</strong> Require Studio IDE + admin deployment + restart window.</div>
+          <div style="font-size:11px;color:#64748b;margin-top:8px;display:flex;flex-direction:column;gap:4px">
+            <div><b>DB:</b> Proprietary schema — similar table count, vendor-managed</div>
+            <div><b>Scaling:</b> JBoss/WAS clustering — complex, expensive</div>
+            <div><b>Changes:</b> Studio → test cycle → admin deploy → restart</div>
           </div>
         </div>
       </div>
-      <!-- Flowable -->
       <div>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-          <div style="width:8px;height:8px;border-radius:50%;background:var(--rak-green);"></div>
-          <div style="font-size:13px;font-weight:700;color:var(--rak-green);">Flowable Architecture (Recommended)</div>
-        </div>
-        <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:16px;">
-          <svg viewBox="0 0 280 180" width="100%" style="display:block;">
-            <!-- Central platform -->
-            <rect x="50" y="10" width="180" height="50" rx="8" fill="white" stroke="#BBF7D0" stroke-width="2"/>
-            <text x="140" y="28" text-anchor="middle" font-size="10" fill="#059669" font-weight="700">Flowable Work (optional)</text>
-            <text x="140" y="40" text-anchor="middle" font-size="8" fill="#64748B">or embedded in Spring Boot</text>
-            <text x="140" y="52" text-anchor="middle" font-size="8" fill="#059669">Apache 2.0 — zero licence cost</text>
-            <!-- DB -->
-            <rect x="90" y="68" width="100" height="22" rx="4" fill="white" stroke="#FDE68A" stroke-width="1.5"/>
-            <text x="140" y="82" text-anchor="middle" font-size="8" fill="#D97706">PostgreSQL (54 tables)</text>
-            <line x1="140" y1="60" x2="140" y2="68" stroke="#BBF7D0" stroke-width="1.5"/>
-            <!-- Worker microservices -->
-            {[20,90,160,225].map((x,i) => `
-              <rect x="${x}" y="106" width="55" height="28" rx="4" fill="#F0FDF4" stroke="#BBF7D0" stroke-width="1"/>
-              <text x="${x+28}" y="118" text-anchor="middle" font-size="8" fill="#059669">Squad ${String.fromCharCode(65+i)}</text>
-              <text x="${x+28}" y="128" text-anchor="middle" font-size="7" fill="#64748B">microservice</text>
-              <line x1="${x+28}" y1="106" x2="140" y2="90" stroke="#BBF7D0" stroke-width="1" stroke-dasharray="3,2"/>`).join('')}
-            <!-- Any IDE label -->
-            <rect x="60" y="150" width="160" height="24" rx="4" fill="#F0FDF4" stroke="#BBF7D0" stroke-width="1.5"/>
-            <text x="140" y="166" text-anchor="middle" font-size="8" fill="#059669">Any IDE — standard Java/Spring</text>
+        <div style="font-size:12px;font-weight:700;color:#059669;margin-bottom:10px">Flowable Architecture (Recommended)</div>
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px">
+          <svg viewBox="0 0 280 160" width="100%" style="display:block">
+            <rect x="50" y="10" width="180" height="44" rx="7" fill="#fff" stroke="#bbf7d0" stroke-width="2"/>
+            <text x="140" y="28" text-anchor="middle" font-size="9" fill="#059669" font-weight="700">Flowable Platform / Embedded</text>
+            <text x="140" y="40" text-anchor="middle" font-size="8" fill="#64748b">Spring Boot — any infra</text>
+            <text x="140" y="52" text-anchor="middle" font-size="7" fill="#059669">Apache 2.0 — zero licence cost</text>
+            <rect x="90" y="60" width="100" height="18" rx="4" fill="#fffbeb" stroke="#fde68a" stroke-width="1.5"/>
+            <text x="140" y="72" text-anchor="middle" font-size="8" fill="#d97706">PostgreSQL (54 tables)</text>
+            <line x1="140" y1="54" x2="140" y2="60" stroke="#bbf7d0" stroke-width="1.5"/>
+            <line x1="30" y1="96" x2="140" y2="78" stroke="#bbf7d0" stroke-width="1" stroke-dasharray="3,2"/>
+            <line x1="95" y1="96" x2="140" y2="78" stroke="#bbf7d0" stroke-width="1" stroke-dasharray="3,2"/>
+            <line x1="185" y1="96" x2="140" y2="78" stroke="#bbf7d0" stroke-width="1" stroke-dasharray="3,2"/>
+            <line x1="250" y1="96" x2="140" y2="78" stroke="#bbf7d0" stroke-width="1" stroke-dasharray="3,2"/>
+            <rect x="5" y="96" width="50" height="20" rx="4" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1"/>
+            <text x="30" y="110" text-anchor="middle" font-size="8" fill="#059669">Squad A</text>
+            <rect x="70" y="96" width="50" height="20" rx="4" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1"/>
+            <text x="95" y="110" text-anchor="middle" font-size="8" fill="#059669">Squad B</text>
+            <rect x="160" y="96" width="50" height="20" rx="4" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1"/>
+            <text x="185" y="110" text-anchor="middle" font-size="8" fill="#059669">Squad C</text>
+            <rect x="225" y="96" width="50" height="20" rx="4" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1"/>
+            <text x="250" y="110" text-anchor="middle" font-size="8" fill="#059669">Squad D</text>
+            <rect x="60" y="130" width="160" height="20" rx="4" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.5"/>
+            <text x="140" y="144" text-anchor="middle" font-size="8" fill="#059669">Any IDE — standard Java / Spring Boot</text>
           </svg>
-          <div style="font-size:12px;color:var(--rak-muted);margin-top:8px;">
-            <div style="margin-bottom:4px;"><strong>Architecture:</strong> Central Flowable cluster OR embedded — your choice.</div>
-            <div style="margin-bottom:4px;"><strong>DB schema:</strong> 54 standard tables. Open source. Self-manageable.</div>
-            <div style="margin-bottom:4px;"><strong>Scaling:</strong> Spring Boot / Kubernetes — same as your other services.</div>
-            <div><strong>Changes:</strong> Edit BPMN XML → push → hot-redeploy in &lt;30s. No IDE lock-in.</div>
+          <div style="font-size:11px;color:#64748b;margin-top:8px;display:flex;flex-direction:column;gap:4px">
+            <div><b>DB:</b> Open-source schema — self-managed, horizontally scalable</div>
+            <div><b>Scaling:</b> Kubernetes — same as your other Spring Boot services</div>
+            <div><b>Changes:</b> Edit BPMN → push → hot-redeploy in &lt;30s. No IDE.</div>
           </div>
         </div>
       </div>
     </div>
-    <div style="margin-top:14px;" class="callout callout-green">
-      <strong>Key difference:</strong> Both Newgen iBPS and Flowable use a centralised DB schema approach (similar table count). The difference is that Flowable's schema is open-source, self-managed, and horizontally scalable — while iBPS's schema is proprietary and tied to vendor support.
+    <div class="callout g" style="margin-top:12px">
+      <b>Both are centralised</b> — Newgen iBPS and Flowable both use a shared DB schema (similar table count). The key difference: Flowable's schema is open, self-managed, and cloud-native. iBPS schema is proprietary, vendor-supported, and tied to a J2EE server.
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════ SLIDE 16 — RESILIENCE -->
+<!-- ── 16. RESILIENCE ────────────────────────────────────── -->
 <div class="slide">
-  <div class="slide-content">
-    <h2 class="section-title">Resilience — <span>Persist Then Execute</span></h2>
-    <div class="divider"></div>
-    <div class="grid-2" style="margin-top:24px;">
+  <div class="content">
+    <h2>Resilience — <span>Persist Then Execute</span></h2><div class="bar"></div>
+    <div class="grid2">
       <div>
-        <div style="font-size:13px;font-weight:700;color:var(--rak-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:14px;">How It Works</div>
-        <div style="position:relative;">
-          {[
-            ['1','Process reaches async task','bg-blue-100 text-blue-700','#2563EB'],
-            ['2','Job written to ACT_RU_JOB','bg-amber-100 text-amber-700','#D97706'],
-            ['3','Async executor picks up job','bg-purple-100 text-purple-700','#7C3AED'],
-            ['4','Execute (Fircosoft/AECB call)','bg-purple-100 text-purple-700','#7C3AED'],
-            ['5','Job removed on success','bg-green-100 text-green-700','#059669'],
-            ['CRASH','Server crashes at step 3','bg-red-100 text-red-700','#C8102E'],
-            ['RECOVER','Restart → executor retries job','bg-green-100 text-green-700','#059669'],
-          ].map(([n,t,cls,tc],i) => `
-            <div style="display:flex;gap:12px;align-items:center;margin-bottom:8px;">
-              <div style="width:28px;height:28px;border-radius:50%;background:${tc};color:white;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;">${n}</div>
-              <div style="font-size:13px;color:var(--rak-text);">${t}</div>
-            </div>
-            ${i < 6 ? `<div style="width:2px;height:8px;background:var(--rak-border);margin-left:13px;margin-bottom:0px;"></div>` : ''}`).join('')}
+        <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:12px">How It Works</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;gap:10px;align-items:center"><div style="width:26px;height:26px;border-radius:50%;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0">1</div><span style="font-size:13px">Process reaches async task</span></div>
+          <div style="width:2px;height:8px;background:#e2e8f0;margin-left:12px"></div>
+          <div style="display:flex;gap:10px;align-items:center"><div style="width:26px;height:26px;border-radius:50%;background:#d97706;color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0">2</div><span style="font-size:13px">Job written to <code>ACT_RU_JOB</code> (persisted)</span></div>
+          <div style="width:2px;height:8px;background:#e2e8f0;margin-left:12px"></div>
+          <div style="display:flex;gap:10px;align-items:center"><div style="width:26px;height:26px;border-radius:50%;background:#7c3aed;color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0">3</div><span style="font-size:13px">Async executor picks up + executes job</span></div>
+          <div style="width:2px;height:8px;background:#e2e8f0;margin-left:12px"></div>
+          <div style="display:flex;gap:10px;align-items:center"><div style="width:26px;height:26px;border-radius:50%;background:#059669;color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0">4</div><span style="font-size:13px">Job removed on success. Process continues.</span></div>
+          <div style="width:2px;height:8px;background:#e2e8f0;margin-left:12px"></div>
+          <div style="display:flex;gap:10px;align-items:center"><div style="width:26px;height:26px;border-radius:50%;background:#C8102E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0">💥</div><span style="font-size:13px;color:#C8102E">Server crashes at step 3?</span></div>
+          <div style="width:2px;height:8px;background:#e2e8f0;margin-left:12px"></div>
+          <div style="display:flex;gap:10px;align-items:center"><div style="width:26px;height:26px;border-radius:50%;background:#059669;color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0">✓</div><span style="font-size:13px;color:#059669">Restart → executor retries job automatically</span></div>
         </div>
       </div>
-      <div style="display:flex;flex-direction:column;gap:14px;">
-        <div style="font-size:13px;font-weight:700;color:var(--rak-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px;">5 Dedicated Job Tables</div>
-        {[
-          ['ACT_RU_JOB','Immediate async execution queue','red'],
-          ['ACT_RU_TIMER_JOB','Scheduled jobs (SLA timers, reminders)','amber'],
-          ['ACT_RU_SUSPENDED_JOB','Paused jobs (process suspended)','gray'],
-          ['ACT_RU_DEADLETTER_JOB','Failed jobs after max retries — alert ops','red'],
-          ['ACT_RU_EXTERNAL_JOB','External worker tasks (polling model)','blue'],
-        ].map(([t,d,c]) => {
-          const colors = {red:'#FEF2F4|#FECDD3|#C8102E',amber:'#FFFBEB|#FDE68A|#D97706',gray:'var(--rak-light)|var(--rak-border)|var(--rak-muted)',blue:'#EFF6FF|#BFDBFE|#2563EB'};
-          const [bg,br,tc] = colors[c].split('|');
-          return `<div style="padding:10px 14px;background:${bg};border-radius:8px;border:1px solid ${br};">
-            <div style="font-family:monospace;font-size:11px;font-weight:700;color:${tc};">${t}</div>
-            <div style="font-size:11px;color:var(--rak-muted);margin-top:2px;">${d}</div>
-          </div>`;
-        }).join('')}
-        <div class="callout callout-green">
-          Separating job types eliminates lock contention. Timer jobs and immediate jobs never compete for the same DB row locks.
-        </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:2px">5 Dedicated Job Tables</div>
+        <div class="row red"><code style="font-size:11px;color:#C8102E;flex-shrink:0;width:170px">ACT_RU_JOB</code><span class="muted">Immediate async execution queue</span></div>
+        <div class="row amber"><code style="font-size:11px;color:#d97706;flex-shrink:0;width:170px">ACT_RU_TIMER_JOB</code><span class="muted">Scheduled jobs (SLA timers, reminders)</span></div>
+        <div class="row"><code style="font-size:11px;color:#64748b;flex-shrink:0;width:170px">ACT_RU_SUSPENDED_JOB</code><span class="muted">Paused jobs (process suspended)</span></div>
+        <div class="row red"><code style="font-size:11px;color:#C8102E;flex-shrink:0;width:170px">ACT_RU_DEADLETTER_JOB</code><span class="muted">Failed after max retries — alert ops</span></div>
+        <div class="row blue"><code style="font-size:11px;color:#2563eb;flex-shrink:0;width:170px">ACT_RU_EXTERNAL_JOB</code><span class="muted">External worker tasks (polling model)</span></div>
+        <div class="callout g">Separating job types eliminates DB lock contention. Timer jobs and immediate jobs never compete for the same row locks.</div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════ SLIDE 17 — HOT DEPLOYMENT -->
+<!-- ── 17. HOT DEPLOYMENT ────────────────────────────────── -->
 <div class="slide">
-  <div class="slide-content">
-    <h2 class="section-title">Hot Deployment — <span>Zero Downtime</span></h2>
-    <div class="divider"></div>
-    <div class="grid-2" style="margin-top:24px;">
-      <div>
-        <div style="font-size:13px;font-weight:700;color:var(--rak-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:14px;">Process Versioning in Action</div>
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          {[
-            ['BPMN v1','account-onboarding v1','9 running instances continue on v1 unaffected','emerald'],
-            ['Deploy v2','Add ThreatMetrix v2 check','Edit XML → hot redeploy → version counter increments','blue'],
-            ['BPMN v2','account-onboarding v2','All new applications start on v2 automatically','purple'],
-            ['Coexistence','Both versions active','ACT_RE_PROCDEF: VERSION_ column tracks both','amber'],
-          ].map(([t,sub,d,c]) => {
-            const colors = {emerald:'#F0FDF4|#BBF7D0|#059669',blue:'#EFF6FF|#BFDBFE|#2563EB',purple:'#F5F3FF|#DDD6FE|#7C3AED',amber:'#FFFBEB|#FDE68A|#D97706'};
-            const [bg,br,tc] = colors[c].split('|');
-            return `<div style="padding:12px;background:${bg};border-radius:10px;border:1px solid ${br};">
-              <div style="font-weight:700;color:${tc};margin-bottom:2px;">${t}</div>
-              <div style="font-size:12px;font-weight:600;color:var(--rak-text);margin-bottom:3px;">${sub}</div>
-              <div style="font-size:11px;color:var(--rak-muted);">${d}</div>
-            </div>`;
-          }).join('')}
+  <div class="content">
+    <h2>Hot Deployment — <span>Zero Downtime</span></h2><div class="bar"></div>
+    <div class="grid2">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:2px">Process Versioning in Action</div>
+        <div class="row green"><div><b style="color:#059669">BPMN v1 active</b><div class="muted">9 running instances continue on v1, completely unaffected</div></div></div>
+        <div class="row blue"><div><b style="color:#2563eb">Deploy v2 (30 seconds)</b><div class="muted">Edit XML → hot redeploy → version counter increments in ACT_RE_PROCDEF</div></div></div>
+        <div class="row" style="background:#f5f3ff;border-color:#ddd6fe"><div><b style="color:#7c3aed">BPMN v2 live</b><div class="muted">All new applications start on v2. Old ones still on v1.</div></div></div>
+        <div class="row amber"><div><b style="color:#d97706">Coexistence</b><div class="muted">Both versions active simultaneously. Zero migration scripts needed.</div></div></div>
+        <div class="card" style="background:#f8f9fa;padding:12px">
+          <div style="font-size:11px;color:#64748b;font-family:monospace;line-height:1.7">repositoryService<br>&nbsp;&nbsp;.createDeployment()<br>&nbsp;&nbsp;.addClasspathResource(<br>&nbsp;&nbsp;&nbsp;&nbsp;"processes/onboarding.bpmn20.xml")<br>&nbsp;&nbsp;.deploy(); <span style="color:#059669">// VERSION_ = 2</span></div>
         </div>
       </div>
-      <div style="display:flex;flex-direction:column;gap:14px;">
-        <div class="card">
-          <div style="font-size:13px;font-weight:700;margin-bottom:12px;">Deployment Time Comparison</div>
-          <div style="display:flex;flex-direction:column;gap:8px;">
-            {[
-              ['Flowable hot-deploy','< 30s','97%','#059669'],
-              ['Newgen iBPS Studio','2-4 hrs','28%','#C8102E'],
-              ['Traditional code deploy','30-60 min','14%','#D97706'],
-            ].map(([l,t,w,c]) => `
-              <div>
-                <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
-                  <span style="font-size:12px;color:var(--rak-text);">${l}</span>
-                  <span style="font-size:11px;font-weight:700;color:${c};">${t}</span>
-                </div>
-                <div class="bar-track"><div class="bar-fill" style="background:${c};--target:${w};width:0;">&nbsp;</div></div>
-              </div>`).join('')}
-          </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:2px">Deployment Time Comparison</div>
+        <div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:12px">Flowable hot-deploy</span><b style="color:#059669">&lt; 30s</b></div>
+          <div class="btrack"><div class="bfill" style="width:97%;background:#059669">&lt;30s</div></div>
         </div>
-        <div class="callout callout-blue">
-          <strong>How it works technically:</strong><br>
-          <code>repositoryService.createDeployment().addClasspathResource("processes/account-onboarding.bpmn20.xml").deploy()</code><br><br>
-          Flowable inserts a new row in <code>ACT_RE_PROCDEF</code> with <code>VERSION_=2</code>. In-flight instances hold a <code>PROC_DEF_ID_</code> reference to v1 — they're never touched.
+        <div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:12px">Traditional code deploy</span><b style="color:#d97706">30–60 min</b></div>
+          <div class="btrack"><div class="bfill" style="width:14%;background:#d97706">~45m</div></div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:12px">Newgen iBPS Studio</span><b style="color:#C8102E">2–4 hours</b></div>
+          <div class="btrack"><div class="bfill" style="width:8%;background:#C8102E">4h</div></div>
+        </div>
+        <div class="callout g" style="margin-top:4px">
+          <b>Impact:</b> A compliance rule change (e.g. new sanctions list integration) that takes 4 hours on Newgen takes <b>30 seconds on Flowable</b> — with zero service disruption.
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════ SLIDE 18 — COST & TCO -->
+<!-- ── 18. COST & TCO ────────────────────────────────────── -->
 <div class="slide">
-  <div class="slide-content">
-    <h2 class="section-title">Cost & <span>TCO Comparison</span></h2>
-    <div class="divider"></div>
-    <div class="grid-2" style="margin-top:20px;gap:24px;">
+  <div class="content">
+    <h2>Cost &amp; <span>TCO Comparison</span></h2><div class="bar"></div>
+    <div class="grid2" style="gap:24px">
       <div>
-        <div style="font-size:13px;font-weight:700;color:var(--rak-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:14px;">3-Year Total Cost of Ownership</div>
-        <div style="display:flex;flex-direction:column;gap:10px;">
-          {[
-            ['Newgen iBPS','License fees (per-seat × 150 users)','AED 1,200,000 / year'],
-            ['Newgen iBPS','Runtime / process execution licensing','AED 480,000 / year'],
-            ['Newgen iBPS','iBPS Studio seats (50 developers)','AED 360,000 / year'],
-            ['Newgen iBPS','Annual maintenance & support (20%)','AED 408,000 / year'],
-          ].map(([prod,c,v]) => `
-            <div style="display:flex;justify-content:space-between;padding:8px 12px;background:#FEF2F4;border-radius:6px;border:1px solid #FECDD3;">
-              <div>
-                <div style="font-size:11px;font-weight:600;color:var(--rak-red);">${prod}</div>
-                <div style="font-size:11px;color:var(--rak-muted);">${c}</div>
-              </div>
-              <div style="font-weight:700;color:var(--rak-red);font-size:12px;">${v}</div>
-            </div>`).join('')}
-          <div style="padding:10px 12px;background:#FEF2F4;border-radius:8px;border:2px solid var(--rak-red);margin-top:4px;">
-            <div style="display:flex;justify-content:space-between;">
-              <span style="font-weight:800;color:var(--rak-red);">Newgen iBPS 3-Year TCO</span>
-              <span style="font-weight:800;color:var(--rak-red);font-size:1.1rem;">AED 7,344,000</span>
-            </div>
-          </div>
+        <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:10px">Newgen iBPS — 3-Year TCO</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;justify-content:space-between;padding:8px 12px;background:#fef2f4;border-radius:6px;border:1px solid #fecdd3"><div><div style="font-size:11px;font-weight:600;color:#C8102E">License fees (150 users)</div><div class="muted">Per-seat annual licensing</div></div><b style="color:#C8102E">AED 1,200,000/yr</b></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 12px;background:#fef2f4;border-radius:6px;border:1px solid #fecdd3"><div><div style="font-size:11px;font-weight:600;color:#C8102E">Runtime / process execution</div><div class="muted">Per-process execution fees</div></div><b style="color:#C8102E">AED 480,000/yr</b></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 12px;background:#fef2f4;border-radius:6px;border:1px solid #fecdd3"><div><div style="font-size:11px;font-weight:600;color:#C8102E">Studio IDE (50 devs)</div><div class="muted">Developer tooling licenses</div></div><b style="color:#C8102E">AED 360,000/yr</b></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 12px;background:#fef2f4;border-radius:6px;border:1px solid #fecdd3"><div><div style="font-size:11px;font-weight:600;color:#C8102E">Maintenance &amp; support</div><div class="muted">Annual 20% of license value</div></div><b style="color:#C8102E">AED 408,000/yr</b></div>
+          <div style="display:flex;justify-content:space-between;padding:12px;background:#fef2f4;border-radius:8px;border:2px solid #C8102E"><b style="color:#C8102E">3-Year Total</b><b style="color:#C8102E;font-size:1.1rem">AED 7,344,000</b></div>
         </div>
       </div>
       <div>
-        <div style="font-size:13px;font-weight:700;color:var(--rak-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:14px;">Flowable Open Source</div>
-        <div style="display:flex;flex-direction:column;gap:10px;">
-          {[
-            ['Flowable OSS','Software license cost','AED 0 (Apache 2.0)'],
-            ['Flowable OSS','Runtime / execution cost','AED 0 (embedded)'],
-            ['Flowable OSS','Developer tooling (any IDE)','AED 0 (standard Java)'],
-            ['Flowable Enterprise','Optional: Flowable Work admin UI','AED 120,000 / year'],
-          ].map(([prod,c,v]) => `
-            <div style="display:flex;justify-content:space-between;padding:8px 12px;background:#F0FDF4;border-radius:6px;border:1px solid #BBF7D0;">
-              <div>
-                <div style="font-size:11px;font-weight:600;color:var(--rak-green);">${prod}</div>
-                <div style="font-size:11px;color:var(--rak-muted);">${c}</div>
-              </div>
-              <div style="font-weight:700;color:var(--rak-green);font-size:12px;">${v}</div>
-            </div>`).join('')}
-          <div style="padding:10px 12px;background:#F0FDF4;border-radius:8px;border:2px solid var(--rak-green);margin-top:4px;">
-            <div style="display:flex;justify-content:space-between;">
-              <span style="font-weight:800;color:var(--rak-green);">Flowable 3-Year TCO</span>
-              <span style="font-weight:800;color:var(--rak-green);font-size:1.1rem;">AED 360,000</span>
-            </div>
-          </div>
-          <div class="callout callout-green" style="margin-top:4px;">
-            <strong>Saving: AED 6,984,000 over 3 years</strong> — 95% cost reduction vs Newgen iBPS.
-          </div>
+        <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:10px">Flowable Open Source — 3-Year TCO</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;justify-content:space-between;padding:8px 12px;background:#f0fdf4;border-radius:6px;border:1px solid #bbf7d0"><div><div style="font-size:11px;font-weight:600;color:#059669">Software license</div><div class="muted">Apache 2.0 — open source</div></div><b style="color:#059669">AED 0</b></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 12px;background:#f0fdf4;border-radius:6px;border:1px solid #bbf7d0"><div><div style="font-size:11px;font-weight:600;color:#059669">Runtime / execution</div><div class="muted">Embedded — no extra cost</div></div><b style="color:#059669">AED 0</b></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 12px;background:#f0fdf4;border-radius:6px;border:1px solid #bbf7d0"><div><div style="font-size:11px;font-weight:600;color:#059669">Developer tooling</div><div class="muted">Any IDE — IntelliJ, VS Code</div></div><b style="color:#059669">AED 0</b></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 12px;background:#f0fdf4;border-radius:6px;border:1px solid #bbf7d0"><div><div style="font-size:11px;font-weight:600;color:#059669">Flowable Work (optional)</div><div class="muted">Enterprise admin UI</div></div><b style="color:#059669">AED 120,000/yr</b></div>
+          <div style="display:flex;justify-content:space-between;padding:12px;background:#f0fdf4;border-radius:8px;border:2px solid #059669"><b style="color:#059669">3-Year Total</b><b style="color:#059669;font-size:1.1rem">AED 360,000</b></div>
         </div>
+        <div class="callout g" style="margin-top:10px"><b>Saving: AED 6,984,000 over 3 years</b> — 95% cost reduction vs Newgen iBPS.</div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════ SLIDE 19 — ROADMAP -->
+<!-- ── 19. ROADMAP ───────────────────────────────────────── -->
 <div class="slide">
-  <div class="slide-content">
-    <h2 class="section-title">Implementation <span>Roadmap</span></h2>
-    <div class="divider"></div>
-    <div style="margin-top:24px;">
-      <div style="display:flex;gap:0;">
-        {[
-          ['M1-2','Foundation','8 weeks','PostgreSQL schema · Spring Boot module · CI/CD pipeline · Flowable Work deployment · Team training','#C8102E'],
-          ['M3-4','Onboarding v1','8 weeks','Production BPMN replacing manual process · Fircosoft + AECB real API integration · EFR filing · RM Task Inbox','#D97706'],
-          ['M5-6','Scale & Expand','8 weeks','Lending workflow · Trade Finance LC · Central BPM platform · Multi-squad onboarding · DMN decision tables','#059669'],
-          ['M7+','Continuous','Ongoing','KYC refresh automation · Dispute resolution · Regulatory reporting · Additional products','#7C3AED'],
-        ].map(([phase,title,dur,items,color],i) => `
-          <div style="flex:1;padding:0 8px;border-left:3px solid ${i===0?color:'var(--rak-border)'};position:relative;">
-            <div style="width:14px;height:14px;border-radius:50%;background:${color};position:absolute;left:-8px;top:0;border:2px solid white;box-shadow:0 0 0 2px ${color};"></div>
-            <div style="font-size:10px;font-weight:700;color:${color};text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">${phase}</div>
-            <div style="font-size:14px;font-weight:700;color:var(--rak-text);margin-bottom:2px;">${title}</div>
-            <div style="font-size:11px;color:var(--rak-muted);margin-bottom:8px;">${dur}</div>
-            <div style="font-size:11px;color:var(--rak-muted);line-height:1.5;">${items}</div>
-          </div>`).join('')}
+  <div class="content">
+    <h2>Implementation <span>Roadmap</span></h2><div class="bar"></div>
+    <div style="display:flex;gap:0;margin-bottom:20px">
+      <div style="flex:1;padding:0 10px;border-left:3px solid #C8102E;position:relative">
+        <div style="width:12px;height:12px;border-radius:50%;background:#C8102E;position:absolute;left:-7px;top:0;border:2px solid #fff;box-shadow:0 0 0 2px #C8102E"></div>
+        <div style="font-size:10px;font-weight:700;color:#C8102E;text-transform:uppercase;margin-bottom:3px">M1–M2</div>
+        <div style="font-weight:700;margin-bottom:3px">Foundation</div>
+        <div class="muted">PostgreSQL · Spring Boot module · CI/CD · Flowable Work deploy · Team training</div>
+      </div>
+      <div style="flex:1;padding:0 10px;border-left:3px solid #d97706;position:relative">
+        <div style="width:12px;height:12px;border-radius:50%;background:#d97706;position:absolute;left:-7px;top:0;border:2px solid #fff;box-shadow:0 0 0 2px #d97706"></div>
+        <div style="font-size:10px;font-weight:700;color:#d97706;text-transform:uppercase;margin-bottom:3px">M3–M4</div>
+        <div style="font-weight:700;margin-bottom:3px">Onboarding v1</div>
+        <div class="muted">Production BPMN · Real Fircosoft + AECB APIs · EFR filing · RM Task Inbox</div>
+      </div>
+      <div style="flex:1;padding:0 10px;border-left:3px solid #059669;position:relative">
+        <div style="width:12px;height:12px;border-radius:50%;background:#059669;position:absolute;left:-7px;top:0;border:2px solid #fff;box-shadow:0 0 0 2px #059669"></div>
+        <div style="font-size:10px;font-weight:700;color:#059669;text-transform:uppercase;margin-bottom:3px">M5–M6</div>
+        <div style="font-weight:700;margin-bottom:3px">Scale &amp; Expand</div>
+        <div class="muted">Lending workflow · Trade Finance LC · Central BPM platform · Multi-squad · DMN</div>
+      </div>
+      <div style="flex:1;padding:0 10px;border-left:3px solid #7c3aed;position:relative">
+        <div style="width:12px;height:12px;border-radius:50%;background:#7c3aed;position:absolute;left:-7px;top:0;border:2px solid #fff;box-shadow:0 0 0 2px #7c3aed"></div>
+        <div style="font-size:10px;font-weight:700;color:#7c3aed;text-transform:uppercase;margin-bottom:3px">M7+</div>
+        <div style="font-weight:700;margin-bottom:3px">Continuous</div>
+        <div class="muted">KYC refresh · Dispute resolution · Regulatory reporting · Additional products</div>
       </div>
     </div>
-    <div style="margin-top:28px;" class="grid-3">
-      {[
-        ['Q1 2027','First production workflow live — business banking onboarding replaces manual process'],
-        ['Q2 2027','3 additional products on Flowable — lending, trade finance, cards'],
-        ['Q3 2027','Full RAKBANK BPM platform — all squads, single engine, Flowable Work dashboards'],
-      ].map(([q,d]) => `
-        <div class="card" style="border-top:3px solid var(--rak-red);">
-          <div style="font-weight:800;color:var(--rak-red);margin-bottom:6px;">${q}</div>
-          <p style="font-size:12px;color:var(--rak-muted);line-height:1.5;">${d}</p>
-        </div>`).join('')}
+    <div class="grid3">
+      <div class="card tag-r"><b style="color:#C8102E">Q1 2027</b><p class="muted" style="margin-top:4px">First production workflow live — business banking onboarding replaces manual process</p></div>
+      <div class="card tag-g"><b style="color:#059669">Q2 2027</b><p class="muted" style="margin-top:4px">3 additional products on Flowable — lending, trade finance, cards</p></div>
+      <div class="card tag-p"><b style="color:#7c3aed">Q3 2027</b><p class="muted" style="margin-top:4px">Full RAKBANK BPM platform — all squads, single engine, Flowable Work dashboards</p></div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════ SLIDE 20 — CLOSING -->
+<!-- ── 20. CLOSING ───────────────────────────────────────── -->
 <div class="slide">
-  <div class="slide-content" style="display:flex;flex-direction:column;justify-content:center;height:100%;padding-top:72px;">
-    <h2 class="section-title" style="font-size:2rem;">Why Flowable for <span>RAKBANK</span>?</h2>
-    <div class="divider"></div>
-    <div class="grid-3" style="margin-top:28px;gap:16px;">
-      {[
-        ['AED 6.9M','Saved over 3 years vs Newgen iBPS TCO'],
-        ['61%','Faster screening via parallel gateway'],
-        ['< 30s','Process change deployment time'],
-        ['Zero','Vendor lock-in — pure BPMN 2.0 standard'],
-        ['54','Well-designed tables — once per environment'],
-        ['5 squads','Share one platform, one schema, full isolation'],
-      ].map(([n,l]) => `
-        <div class="card" style="text-align:center;padding:24px 16px;border-top:3px solid var(--rak-red);">
-          <div class="stat-num">${n}</div>
-          <div class="stat-label">${l}</div>
-        </div>`).join('')}
+  <div class="content" style="padding-top:40px">
+    <h2>Why Flowable for <span>RAKBANK</span>?</h2><div class="bar"></div>
+    <div class="grid3" style="gap:14px;margin-bottom:20px">
+      <div class="card tag-r" style="text-align:center;padding:20px"><div class="big">AED 6.9M</div><div class="muted">Saved vs Newgen iBPS 3-yr TCO</div></div>
+      <div class="card tag-g" style="text-align:center;padding:20px"><div class="big">61%</div><div class="muted">Faster screening (parallel gateway)</div></div>
+      <div class="card tag-r" style="text-align:center;padding:20px"><div class="big">&lt;30s</div><div class="muted">Process change deployment time</div></div>
+      <div class="card tag-g" style="text-align:center;padding:20px"><div class="big">Zero</div><div class="muted">Vendor lock-in — pure BPMN 2.0</div></div>
+      <div class="card" style="text-align:center;padding:20px;border-top:3px solid #d97706"><div class="big" style="color:#d97706">54</div><div class="muted">Tables once per env — not per service</div></div>
+      <div class="card tag-b" style="text-align:center;padding:20px"><div class="big" style="color:#2563eb">5</div><div class="muted">Squads — 1 platform, 1 schema</div></div>
     </div>
-    <div style="margin-top:28px;display:flex;gap:16px;">
-      <div class="callout" style="flex:2;">
-        <strong>Recommendation:</strong> Proceed with Flowable as RAKBANK's enterprise BPM platform.
-        POC demonstrates production-ready capabilities. Begin with business banking onboarding
-        (Q1 2027) and expand to lending and trade finance within 6 months.
+    <div style="display:flex;gap:14px">
+      <div class="callout g" style="flex:3">
+        <b>Recommendation:</b> Proceed with Flowable as RAKBANK's enterprise BPM platform.
+        POC demonstrates production-ready capabilities. Begin with business banking onboarding (Q1 2027)
+        and expand to lending and trade finance within 6 months.
       </div>
-      <div class="card" style="flex:1;text-align:center;padding:20px;background:var(--rak-red);border:none;">
-        <div style="font-size:24px;font-weight:800;color:white;margin-bottom:4px;">Ready</div>
-        <div style="font-size:12px;color:rgba(255,255,255,.8);">to go live</div>
-        <div style="font-size:10px;color:rgba(255,255,255,.6);margin-top:8px;">Live demo at localhost:3000</div>
+      <div class="card" style="flex:1;text-align:center;padding:20px;background:#C8102E;border:none">
+        <div style="font-size:1.5rem;font-weight:800;color:#fff">Ready</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.8);margin-top:4px">to go live</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.6);margin-top:6px">localhost:3000</div>
       </div>
     </div>
   </div>
@@ -1286,37 +863,34 @@ h2.section-title span { color: var(--rak-red); }
 </div><!-- end deck -->
 
 <script>
-const TOTAL = 20;
+const N = 20;
 let cur = 0;
 const slides = document.querySelectorAll('.slide');
-
-function nav(dir) {
-  const n = Math.max(0, Math.min(TOTAL - 1, cur + dir));
+function go(d) {
+  const n = Math.max(0, Math.min(N-1, cur+d));
   if (n === cur) return;
+  slides[cur].style.opacity = '0';
+  slides[cur].style.transform = d>0 ? 'translateX(-40px)' : 'translateX(40px)';
   slides[cur].classList.remove('active');
-  slides[cur].classList.add(dir > 0 ? 'exit-left' : 'exit-right');
-  setTimeout(() => slides[cur - dir].classList.remove(dir > 0 ? 'exit-left' : 'exit-right'), 350);
   cur = n;
+  slides[cur].style.opacity = '0';
+  slides[cur].style.transform = d>0 ? 'translateX(40px)' : 'translateX(-40px)';
   slides[cur].classList.add('active');
-  document.getElementById('progress').style.width = ((cur + 1) / TOTAL * 100) + '%';
-  document.getElementById('counter').textContent = (cur + 1) + ' / ' + TOTAL;
+  requestAnimationFrame(() => {
+    slides[cur].style.transition = 'opacity .3s, transform .3s';
+    slides[cur].style.opacity = '1';
+    slides[cur].style.transform = 'translateY(0)';
+  });
+  document.getElementById('pf').style.width = ((cur+1)/N*100)+'%';
+  document.getElementById('cnt').textContent = (cur+1)+' / '+N;
 }
-
 document.addEventListener('keydown', e => {
-  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); nav(+1); }
-  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')                    { e.preventDefault(); nav(-1); }
+  if (e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' ') { e.preventDefault(); go(1); }
+  if (e.key==='ArrowLeft' ||e.key==='ArrowUp')                { e.preventDefault(); go(-1); }
 });
-
-// Touch/swipe
-let tx = 0;
-document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
-document.addEventListener('touchend',   e => {
-  const dx = tx - e.changedTouches[0].clientX;
-  if (Math.abs(dx) > 50) nav(dx > 0 ? 1 : -1);
-}, { passive: true });
-
-// Init progress
-document.getElementById('progress').style.width = (1 / TOTAL * 100) + '%';
+let tx=0;
+document.addEventListener('touchstart', e=>{ tx=e.touches[0].clientX; },{passive:true});
+document.addEventListener('touchend',   e=>{ const d=tx-e.changedTouches[0].clientX; if(Math.abs(d)>50) go(d>0?1:-1); },{passive:true});
 </script>
 </body>
 </html>
