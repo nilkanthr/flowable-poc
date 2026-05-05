@@ -92,8 +92,8 @@ h2{font-size:1.5rem;font-weight:700;color:#1a1a2e;margin-bottom:6px}
     <h1>Business Account Onboarding<br>with <span>Flowable BPM</span></h1>
     <div class="bar"></div>
     <p class="sub" style="max-width:520px;line-height:1.7">
-      A production-grade proof of concept demonstrating Flowable's capabilities
-      vs Newgen iBPS for RAKBANK's enterprise banking workflows.
+      Fitment analysis for replacing Newgen iBPS with Flowable as RAKBANK's
+      enterprise BPM platform. Includes POC, capability comparison, and migration rationale.
     </p>
     <div style="margin-top:28px;display:flex;gap:10px;flex-wrap:wrap">
       <span class="pill pg">✓ Live Demo Running</span>
@@ -114,7 +114,7 @@ h2{font-size:1.5rem;font-weight:700;color:#1a1a2e;margin-bottom:6px}
       <div class="card" style="display:flex;gap:12px"><span style="font-size:20px;font-weight:800;color:#C8102E;opacity:.3">03</span><div><b>BPMN Process Flow</b><div class="muted">14-activity onboarding process with parallel gateway</div></div></div>
       <div class="card" style="display:flex;gap:12px"><span style="font-size:20px;font-weight:800;color:#C8102E;opacity:.3">04</span><div><b>Parallel Processing</b><div class="muted">61% faster screening — 3 async tasks simultaneously</div></div></div>
       <div class="card" style="display:flex;gap:12px"><span style="font-size:20px;font-weight:800;color:#C8102E;opacity:.3">05</span><div><b>5 Demo Scenarios</b><div class="muted">Happy path, sanctions, PEP, credit fail, bulk</div></div></div>
-      <div class="card" style="display:flex;gap:12px"><span style="font-size:20px;font-weight:800;color:#C8102E;opacity:.3">06</span><div><b>Flowable vs Newgen iBPS</b><div class="muted">15-feature comparison — Flowable wins 12 of 15</div></div></div>
+      <div class="card" style="display:flex;gap:12px"><span style="font-size:20px;font-weight:800;color:#C8102E;opacity:.3">06</span><div><b>Why Replace Newgen iBPS</b><div class="muted">15-feature comparison — Flowable wins 13 of 15</div></div></div>
       <div class="card" style="display:flex;gap:12px"><span style="font-size:20px;font-weight:800;color:#C8102E;opacity:.3">07</span><div><b>54 Tables — Reality Check</b><div class="muted">Shared platform model — not per microservice</div></div></div>
       <div class="card" style="display:flex;gap:12px"><span style="font-size:20px;font-weight:800;color:#C8102E;opacity:.3">08</span><div><b>Multi-Squad Architecture</b><div class="muted">5 squads, 1 platform, zero schema duplication</div></div></div>
     </div>
@@ -127,7 +127,7 @@ h2{font-size:1.5rem;font-weight:700;color:#1a1a2e;margin-bottom:6px}
     <h2>The <span>Challenge</span></h2><div class="bar"></div>
     <div class="grid2">
       <div>
-        <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">Current State — Pain Points</div>
+        <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">Current State — Newgen iBPS Limitations</div>
         <div style="display:flex;flex-direction:column;gap:8px">
           <div class="row red"><span style="font-size:18px">🐌</span><div><b style="font-size:13px">Sequential processing</b><div class="muted">Fircosoft → AECB → ThreatMetrix one-by-one. 6-8 seconds.</div></div></div>
           <div class="row red"><span style="font-size:18px">🔒</span><div><b style="font-size:13px">Vendor lock-in</b><div class="muted">Newgen iBPS proprietary format. Studio IDE required.</div></div></div>
@@ -353,7 +353,8 @@ h2{font-size:1.5rem;font-weight:700;color:#1a1a2e;margin-bottom:6px}
 <!-- ── 9. COMPARISON PART 1 ───────────────────────────────── -->
 <div class="slide">
   <div class="content">
-    <h2>Flowable vs Newgen iBPS — <span>Part 1</span></h2><div class="bar"></div>
+    <h2>Why Replace Newgen iBPS — <span>Part 1</span></h2><div class="bar"></div>
+    <p class="muted" style="margin-bottom:12px;font-size:11px">RAKBANK currently runs Newgen iBPS. This analysis evaluates Flowable as its replacement.</p>
     <div class="card" style="padding:0;overflow:hidden">
       <table class="cmp">
         <thead><tr><th style="width:22%">Feature</th><th style="width:38%;color:#059669">✦ Flowable BPM</th><th style="width:30%">Newgen iBPS</th><th>Winner</th></tr></thead>
@@ -375,7 +376,7 @@ h2{font-size:1.5rem;font-weight:700;color:#1a1a2e;margin-bottom:6px}
 <!-- ── 10. COMPARISON PART 2 ──────────────────────────────── -->
 <div class="slide">
   <div class="content">
-    <h2>Flowable vs Newgen iBPS — <span>Part 2</span></h2><div class="bar"></div>
+    <h2>Why Replace Newgen iBPS — <span>Part 2</span></h2><div class="bar"></div>
     <div class="card" style="padding:0;overflow:hidden">
       <table class="cmp">
         <thead><tr><th style="width:22%">Feature</th><th style="width:38%;color:#059669">✦ Flowable BPM</th><th style="width:30%">Newgen iBPS</th><th>Winner</th></tr></thead>
@@ -771,14 +772,18 @@ h2{font-size:1.5rem;font-weight:700;color:#1a1a2e;margin-bottom:6px}
     <h2>Cost &amp; <span>TCO Comparison</span></h2><div class="bar"></div>
     <div class="grid2" style="gap:24px">
       <div>
-        <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:10px">Newgen iBPS — 3-Year TCO</div>
-        <div style="display:flex;flex-direction:column;gap:6px">
-          <div style="display:flex;justify-content:space-between;padding:8px 12px;background:#fef2f4;border-radius:6px;border:1px solid #fecdd3"><div><div style="font-size:11px;font-weight:600;color:#C8102E">License fees (150 users)</div><div class="muted">Per-seat annual licensing</div></div><b style="color:#C8102E">AED 1,200,000/yr</b></div>
-          <div style="display:flex;justify-content:space-between;padding:8px 12px;background:#fef2f4;border-radius:6px;border:1px solid #fecdd3"><div><div style="font-size:11px;font-weight:600;color:#C8102E">Runtime / process execution</div><div class="muted">Per-process execution fees</div></div><b style="color:#C8102E">AED 480,000/yr</b></div>
-          <div style="display:flex;justify-content:space-between;padding:8px 12px;background:#fef2f4;border-radius:6px;border:1px solid #fecdd3"><div><div style="font-size:11px;font-weight:600;color:#C8102E">Studio IDE (50 devs)</div><div class="muted">Developer tooling licenses</div></div><b style="color:#C8102E">AED 360,000/yr</b></div>
-          <div style="display:flex;justify-content:space-between;padding:8px 12px;background:#fef2f4;border-radius:6px;border:1px solid #fecdd3"><div><div style="font-size:11px;font-weight:600;color:#C8102E">Maintenance &amp; support</div><div class="muted">Annual 20% of license value</div></div><b style="color:#C8102E">AED 408,000/yr</b></div>
-          <div style="display:flex;justify-content:space-between;padding:12px;background:#fef2f4;border-radius:8px;border:2px solid #C8102E"><b style="color:#C8102E">3-Year Total</b><b style="color:#C8102E;font-size:1.1rem">AED 7,344,000</b></div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase">Newgen iBPS — 3-Year TCO</div>
+          <span style="font-size:9px;font-weight:700;background:#fef3c7;color:#d97706;padding:2px 7px;border-radius:10px;border:1px solid #fde68a">* Illustrative — Actual contract value TBD</span>
         </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;justify-content:space-between;padding:8px 12px;background:#fef2f4;border-radius:6px;border:1px solid #fecdd3"><div><div style="font-size:11px;font-weight:600;color:#C8102E">License fees (150 users) *</div><div class="muted">Per-seat annual — assumed based on market rates</div></div><b style="color:#C8102E">AED 1,200,000/yr</b></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 12px;background:#fef2f4;border-radius:6px;border:1px solid #fecdd3"><div><div style="font-size:11px;font-weight:600;color:#C8102E">Runtime / process execution *</div><div class="muted">Per-process fees — assumed</div></div><b style="color:#C8102E">AED 480,000/yr</b></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 12px;background:#fef2f4;border-radius:6px;border:1px solid #fecdd3"><div><div style="font-size:11px;font-weight:600;color:#C8102E">Studio IDE (50 devs) *</div><div class="muted">Developer tooling — assumed</div></div><b style="color:#C8102E">AED 360,000/yr</b></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 12px;background:#fef2f4;border-radius:6px;border:1px solid #fecdd3"><div><div style="font-size:11px;font-weight:600;color:#C8102E">Maintenance &amp; support *</div><div class="muted">Annual 20% of license value — assumed</div></div><b style="color:#C8102E">AED 408,000/yr</b></div>
+          <div style="display:flex;justify-content:space-between;padding:12px;background:#fef2f4;border-radius:8px;border:2px solid #C8102E"><b style="color:#C8102E">3-Year Total (Estimated *)</b><b style="color:#C8102E;font-size:1.1rem">AED 7,344,000</b></div>
+        </div>
+        <div style="margin-top:8px;font-size:10px;color:#d97706;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:6px 10px">* Newgen iBPS contract value not confirmed. Figures are illustrative estimates based on typical Newgen pricing. Actual savings to be validated against RAKBANK's current contract.</div>
       </div>
       <div>
         <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:10px">Flowable Enterprise — 3-Year TCO</div>
@@ -789,7 +794,7 @@ h2{font-size:1.5rem;font-weight:700;color:#1a1a2e;margin-bottom:6px}
           <div style="display:flex;justify-content:space-between;padding:8px 12px;background:#f0fdf4;border-radius:6px;border:1px solid #bbf7d0"><div><div style="font-size:11px;font-weight:600;color:#059669">Maintenance &amp; support</div><div class="muted">Included in Enterprise license</div></div><b style="color:#059669">AED 0</b></div>
           <div style="display:flex;justify-content:space-between;padding:12px;background:#f0fdf4;border-radius:8px;border:2px solid #059669"><b style="color:#059669">3-Year Total</b><b style="color:#059669;font-size:1.1rem">AED 1,872,000</b></div>
         </div>
-        <div class="callout g" style="margin-top:10px"><b>Saving: AED 5,472,000 over 3 years</b> — 74% cost reduction vs Newgen iBPS.</div>
+        <div class="callout g" style="margin-top:10px"><b>Estimated saving: AED 5,472,000 over 3 years</b> — 74% cost reduction vs Newgen iBPS. <span style="font-weight:400;color:#64748b">(Subject to actual Newgen contract value.)</span></div>
       </div>
     </div>
   </div>
@@ -839,7 +844,7 @@ h2{font-size:1.5rem;font-weight:700;color:#1a1a2e;margin-bottom:6px}
   <div class="content" style="padding-top:40px">
     <h2>Why Flowable for <span>RAKBANK</span>?</h2><div class="bar"></div>
     <div class="grid3" style="gap:14px;margin-bottom:20px">
-      <div class="card tag-r" style="text-align:center;padding:20px"><div class="big">AED 5.5M</div><div class="muted">Saved vs Newgen iBPS 3-yr TCO</div></div>
+      <div class="card tag-r" style="text-align:center;padding:20px"><div class="big">AED 5.5M</div><div class="muted">Est. saving vs Newgen iBPS 3-yr TCO *</div></div>
       <div class="card tag-g" style="text-align:center;padding:20px"><div class="big">61%</div><div class="muted">Faster screening (parallel gateway)</div></div>
       <div class="card tag-r" style="text-align:center;padding:20px"><div class="big">&lt;30s</div><div class="muted">Process change deployment time</div></div>
       <div class="card tag-g" style="text-align:center;padding:20px"><div class="big">Zero</div><div class="muted">Vendor lock-in — pure BPMN 2.0</div></div>
@@ -848,9 +853,9 @@ h2{font-size:1.5rem;font-weight:700;color:#1a1a2e;margin-bottom:6px}
     </div>
     <div style="display:flex;gap:14px">
       <div class="callout g" style="flex:3">
-        <b>Recommendation:</b> Proceed with Flowable as RAKBANK's enterprise BPM platform.
-        Mortgage IPA goes live May 2026 (currently in PreProd) — the platform is proven at RAKBANK scale.
-        Enterprise license being procured Q2 2026. Business banking onboarding implementation date TBD.
+        <b>Recommendation:</b> Replace Newgen iBPS with Flowable Enterprise as RAKBANK's BPM platform.
+        Mortgage IPA goes live May 2026 (currently PreProd) — Flowable already proven at RAKBANK scale.
+        Enterprise license procurement underway Q2 2026. Business banking onboarding go-live date TBD.
       </div>
       <div class="card" style="flex:1;text-align:center;padding:20px;background:#C8102E;border:none">
         <div style="font-size:1.5rem;font-weight:800;color:#fff">Ready</div>
